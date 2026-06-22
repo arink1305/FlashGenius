@@ -113,7 +113,7 @@ export default function Dashboard() {
                 <div className="dash-hero">
                     <div className="dash-hero-text">
                         <h1>Mine sett 🧠</h1>
-                        <p>Lim inn notater og la AI-en lage flashcards, quiz, sammendrag eller tankekart</p>
+                        <p>Lim inn notater og lag flashcards, quiz, sammendrag eller tankekart</p>
                     </div>
                 </div>
 
