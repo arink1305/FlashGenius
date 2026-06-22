@@ -41,31 +41,40 @@ def try_parse_json(text):
                 continue
     return None
 
-def call_groq_json(system, prompt, attempts=2):
-    raw = ""
-    for _ in range(attempts):
-        try:
-            client = get_groq()
-            response = client.chat.completions.create(
-                model="llama-3.1-8b-instant",
-                messages=[
-                    {"role": "system", "content": system},
-                    {"role": "user", "content": prompt},
-                ],
-                temperature=0.4,
-                max_tokens=2048,
-            )
-            raw = response.choices[0].message.content.strip()
-        except Exception as e:
-            print("GROQ ERROR:", traceback.format_exc())
-            raise HTTPException(status_code=500, detail=str(e))
+def extract_list(result, key):
+    if isinstance(result, list):
+        return result
+    if isinstance(result, dict):
+        if isinstance(result.get(key), list):
+            return result[key]
+        for value in result.values():
+            if isinstance(value, list):
+                return value
+    return []
 
-        parsed = try_parse_json(raw)
-        if parsed is not None:
-            return parsed
-        print("JSON PARSE retry — raw:", raw[:200])
+def call_groq_json(system, prompt):
+    try:
+        client = get_groq()
+        response = client.chat.completions.create(
+            model="llama-3.1-8b-instant",
+            messages=[
+                {"role": "system", "content": system},
+                {"role": "user", "content": prompt},
+            ],
+            temperature=0.4,
+            max_tokens=2048,
+            response_format={"type": "json_object"},
+        )
+        raw = response.choices[0].message.content.strip()
+    except Exception as e:
+        print("GROQ ERROR:", traceback.format_exc())
+        raise HTTPException(status_code=500, detail=str(e))
 
-    raise HTTPException(status_code=500, detail="Could not parse AI response")
+    parsed = try_parse_json(raw)
+    if parsed is None:
+        print("JSON PARSE FAIL — raw:", raw[:200])
+        raise HTTPException(status_code=500, detail="Could not parse AI response")
+    return parsed
 
 def save_content_deck(user_id, title, deck_type, content):
     conn = get_connection()
@@ -113,10 +122,10 @@ def generate(data: NotesIn, authorization: str = Header(...)):
     count = max(1, min(data.count, 30))
     diff_instruction = DIFFICULTY_INSTRUCTIONS.get(data.difficulty, DIFFICULTY_INSTRUCTIONS["medium"])
 
-    prompt = f"""You are a flashcard generator. Return ONLY a JSON array, no markdown, no explanation, no extra text.
+    prompt = f"""You are a flashcard generator. Return ONLY a JSON object, no markdown, no explanation.
 
 Format:
-[{{"question": "...", "answer": "..."}}, {{"question": "...", "answer": "..."}}]
+{{"cards": [{{"question": "...", "answer": "..."}}]}}
 
 Difficulty: {data.difficulty}. {diff_instruction}
 Write in the same language as the notes.
@@ -124,7 +133,7 @@ Write in the same language as the notes.
 Generate exactly {count} flashcards from these notes:
 {data.notes}"""
 
-    cards = call_groq_json("You return only valid JSON arrays. No markdown. No explanation.", prompt)
+    cards = extract_list(call_groq_json("You return only a valid JSON object. No markdown.", prompt), "cards")
 
     conn = get_connection()
     cur = conn.cursor()
@@ -154,10 +163,10 @@ def generate_quiz(data: QuizIn, authorization: str = Header(...)):
         fmt = '[{"question": "...", "options": ["...", "...", "...", "..."], "answer": "..."}]'
         rules = 'Each question must have exactly 4 distinct, plausible options. "answer" must be exactly equal to the correct option string.'
 
-    prompt = f"""You are a quiz generator. Return ONLY a JSON array, no markdown, no explanation.
+    prompt = f"""You are a quiz generator. Return ONLY a JSON object, no markdown, no explanation.
 
 Format:
-{fmt}
+{{"questions": {fmt}}}
 
 {rules}
 Write in the same language as the notes.
@@ -165,7 +174,7 @@ Write in the same language as the notes.
 Generate exactly {count} quiz questions from these notes:
 {data.notes}"""
 
-    questions = call_groq_json("You return only valid JSON arrays. No markdown. No explanation.", prompt)
+    questions = extract_list(call_groq_json("You return only a valid JSON object. No markdown.", prompt), "questions")
     deck_id = save_content_deck(user_id, data.title, "quiz", questions)
     return {"deck_id": deck_id, "type": "quiz", "content": questions}
 
