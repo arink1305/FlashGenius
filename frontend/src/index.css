@@ -531,6 +531,7 @@ input:focus, textarea:focus {
 .auth-logo {
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 10px;
     margin-bottom: 32px;
 }
@@ -558,12 +559,14 @@ input:focus, textarea:focus {
     font-weight: 800;
     letter-spacing: -0.03em;
     margin-bottom: 6px;
+    text-align: center;
 }
 
 .auth-subtitle {
     color: var(--muted);
     font-size: 0.92rem;
     margin-bottom: 28px;
+    text-align: center;
 }
 
 .auth-form { display: flex; flex-direction: column; gap: 14px; }
