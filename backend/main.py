@@ -22,5 +22,21 @@ app.add_middleware(
 def root():
     return {"status": "ok", "service": "FlashGenius API"}
 
+@app.get("/health/db")
+def health_db():
+    url = os.getenv("DATABASE_URL")
+    if not url:
+        return {"db": "DATABASE_URL not set"}
+    try:
+        from database import get_connection
+        conn = get_connection()
+        cur = conn.cursor()
+        cur.execute("SELECT 1")
+        cur.close()
+        conn.close()
+        return {"db": "ok"}
+    except Exception as e:
+        return {"db": "error", "detail": str(e)[:300]}
+
 app.include_router(auth.router, prefix="/auth")
 app.include_router(flashcards.router, prefix="/flashcards")
