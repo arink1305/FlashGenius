@@ -8,6 +8,13 @@ Paste any text, pick how many cards and how hard you want them, and let AI build
 
 <br/>
 
+### 🔗 [**Try the live demo →**](https://flash-genius-vvo5.vercel.app)
+
+<sub>Hosted on Vercel (frontend + serverless backend) with a Neon PostgreSQL database. The backend may take a few seconds to wake up on the first request.</sub>
+
+<br/>
+
+![Live Demo](https://img.shields.io/badge/Live_Demo-flash--genius.vercel.app-000000?style=for-the-badge&logo=vercel&logoColor=white)
 ![React](https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react&logoColor=black)
 ![Vite](https://img.shields.io/badge/Vite-8-646CFF?style=for-the-badge&logo=vite&logoColor=white)
 ![FastAPI](https://img.shields.io/badge/FastAPI-0.138-009688?style=for-the-badge&logo=fastapi&logoColor=white)
