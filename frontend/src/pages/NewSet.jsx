@@ -19,7 +19,7 @@ export default function NewSet() {
             <main className="content">
                 <div className="page-header">
                     <h1>Hva vil du lage? ✨</h1>
-                    <p>Velg hva AI-en skal lage av notatene dine.</p>
+                    <p></p>
                 </div>
 
                 <div className="type-grid">
