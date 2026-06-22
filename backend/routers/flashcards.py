@@ -10,8 +10,10 @@ from database import get_connection
 load_dotenv()
 
 router = APIRouter()
-client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 SECRET_KEY = os.getenv("SECRET_KEY", "fallback_secret")
+
+def get_groq():
+    return Groq(api_key=os.getenv("GROQ_API_KEY"))
 
 def get_user_id(token: str) -> int:
     try:
@@ -51,6 +53,7 @@ Generate exactly {count} flashcards from these notes:
 {data.notes}"""
 
     try:
+        client = get_groq()
         response = client.chat.completions.create(
             model="llama-3.1-8b-instant",
             messages=[
