@@ -5,17 +5,26 @@ import api from "../api";
 export default function Register() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [confirm, setConfirm] = useState("");
     const [error, setError] = useState("");
+    const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
 
     async function handleSubmit(e) {
         e.preventDefault();
+        setError("");
+        if (password !== confirm) {
+            setError("Passordene er ikke like");
+            return;
+        }
+        setLoading(true);
         try {
             const res = await api.post("/auth/register", { email, password });
             localStorage.setItem("token", res.data.token);
             navigate("/");
         } catch {
             setError("E-posten er allerede registrert");
+            setLoading(false);
         }
     }
 
@@ -44,8 +53,11 @@ export default function Register() {
                     <form className="auth-form" onSubmit={handleSubmit}>
                         <input type="email" placeholder="E-post" value={email} onChange={(e) => setEmail(e.target.value)} required />
                         <input type="password" placeholder="Passord (minst 6 tegn)" value={password} onChange={(e) => setPassword(e.target.value)} minLength={6} required />
+                        <input type="password" placeholder="Bekreft passord" value={confirm} onChange={(e) => setConfirm(e.target.value)} minLength={6} required />
                         {error && <p className="error">{error}</p>}
-                        <button type="submit" className="btn-primary">Opprett konto</button>
+                        <button type="submit" className="btn-primary" disabled={loading}>
+                            {loading ? "Oppretter konto..." : "Opprett konto"}
+                        </button>
                     </form>
                     <p className="auth-link">Har allerede konto? <Link to="/login">Logg inn</Link></p>
                 </div>

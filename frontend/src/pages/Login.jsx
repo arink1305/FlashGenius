@@ -6,16 +6,20 @@ export default function Login() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
+    const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
 
     async function handleSubmit(e) {
         e.preventDefault();
+        setError("");
+        setLoading(true);
         try {
             const res = await api.post("/auth/login", { email, password });
             localStorage.setItem("token", res.data.token);
             navigate("/");
         } catch {
             setError("Feil e-post eller passord");
+            setLoading(false);
         }
     }
 
@@ -45,7 +49,9 @@ export default function Login() {
                         <input type="email" placeholder="E-post" value={email} onChange={(e) => setEmail(e.target.value)} required />
                         <input type="password" placeholder="Passord" value={password} onChange={(e) => setPassword(e.target.value)} required />
                         {error && <p className="error">{error}</p>}
-                        <button type="submit" className="btn-primary">Logg inn</button>
+                        <button type="submit" className="btn-primary" disabled={loading}>
+                            {loading ? "Logger inn..." : "Logg inn"}
+                        </button>
                     </form>
                     <p className="auth-link">Har ikke konto? <Link to="/register">Registrer deg</Link></p>
                 </div>
