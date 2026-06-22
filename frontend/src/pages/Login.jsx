@@ -28,7 +28,7 @@ export default function Login() {
             <div className="auth-left">
                 <div className="auth-left-content">
                     <span className="auth-left-icon">⚡</span>
-                    <h2>Lær smartere med AI</h2>
+                    <h2>Lær smartere</h2>
                     <p>Gjør notater om til flashcards på sekunder og mestre ethvert fag raskere.</p>
                 </div>
                 <div className="auth-features">
