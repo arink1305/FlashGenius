@@ -156,19 +156,15 @@ def generate_quiz(data: QuizIn, authorization: str = Header(...)):
     user_id = get_user_id(token)
     count = max(1, min(data.count, 20))
 
-    if data.kind == "yesno":
-        fmt = '[{"question": "...", "options": ["Ja", "Nei"], "answer": "Ja"}]'
-        rules = 'Each question is a statement answerable with yes/no. "options" must be exactly ["Ja", "Nei"]. "answer" must be exactly "Ja" or "Nei".'
-    else:
-        fmt = '[{"question": "...", "options": ["...", "...", "...", "..."], "answer": "..."}]'
-        rules = 'Each question must have exactly 4 distinct, plausible options. "answer" must be exactly equal to the correct option string.'
-
     prompt = f"""You are a quiz generator. Return ONLY a JSON object, no markdown, no explanation.
 
 Format:
-{{"questions": {fmt}}}
+{{"questions": [{{"question": "...", "options": ["...", "...", "...", "..."], "answer": "..."}}]}}
 
-{rules}
+Mix two question styles within the same quiz:
+- Most questions: a question with exactly 4 distinct, plausible options.
+- Some questions: a yes/no statement where "options" is exactly ["Ja", "Nei"].
+For every question, "answer" must exactly equal the correct option string.
 Write in the same language as the notes.
 
 Generate exactly {count} quiz questions from these notes:

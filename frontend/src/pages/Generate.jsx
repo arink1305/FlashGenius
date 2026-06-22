@@ -9,11 +9,6 @@ const difficulties = [
     { value: "hard", label: "Vanskelig", desc: "Dype, detaljerte svar", emoji: "🔴" },
 ];
 
-const quizKinds = [
-    { value: "multiple", label: "Flervalg", desc: "4 alternativer per spørsmål", emoji: "🔢" },
-    { value: "yesno", label: "Ja / Nei", desc: "Påstander med ja eller nei", emoji: "✅" },
-];
-
 const endpoints = {
     flashcards: "/flashcards/generate",
     quiz: "/flashcards/generate-quiz",
@@ -36,7 +31,6 @@ export default function Generate() {
     const [notes, setNotes] = useState("");
     const [count, setCount] = useState(type === "quiz" ? 6 : 8);
     const [difficulty, setDifficulty] = useState("medium");
-    const [kind, setKind] = useState("multiple");
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
 
@@ -49,7 +43,7 @@ export default function Generate() {
         setLoading(true);
         const payload = { title, notes };
         if (type === "flashcards") { payload.count = count; payload.difficulty = difficulty; }
-        if (type === "quiz") { payload.count = count; payload.kind = kind; }
+        if (type === "quiz") { payload.count = count; }
         try {
             const res = await api.post(endpoints[type], payload);
             navigate(deckRoute(type, res.data.deck_id));
@@ -158,24 +152,9 @@ export default function Generate() {
                             )}
 
                             {type === "quiz" && (
-                                <div className="sidebar-card">
-                                    <h3>Type spørsmål</h3>
-                                    <div className="difficulty-selector">
-                                        {quizKinds.map((k) => (
-                                            <button
-                                                key={k.value}
-                                                type="button"
-                                                className={`difficulty-btn ${kind === k.value ? "active" : ""}`}
-                                                onClick={() => setKind(k.value)}
-                                            >
-                                                <span>{k.emoji}</span>
-                                                <span className="difficulty-text">
-                                                    <span className="difficulty-label">{k.label}</span>
-                                                    <span className="difficulty-desc">{k.desc}</span>
-                                                </span>
-                                            </button>
-                                        ))}
-                                    </div>
+                                <div className="generate-tip">
+                                    <strong>🎲 Blandet quiz</strong>
+                                    Du får en miks av flervalg (4 alternativer) og ja/nei-spørsmål automatisk.
                                 </div>
                             )}
 
