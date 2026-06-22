@@ -131,7 +131,7 @@ Difficulty: {data.difficulty}. {diff_instruction}
 Write in the same language as the notes.
 
 Generate exactly {count} flashcards from these notes:
-{data.notes}"""
+{data.notes[:6000]}"""
 
     cards = extract_list(call_groq_json("You return only a valid JSON object. No markdown.", prompt), "cards")
 
@@ -168,7 +168,7 @@ For every question, "answer" must exactly equal the correct option string.
 Write in the same language as the notes.
 
 Generate exactly {count} quiz questions from these notes:
-{data.notes}"""
+{data.notes[:6000]}"""
 
     questions = extract_list(call_groq_json("You return only a valid JSON object. No markdown.", prompt), "questions")
     deck_id = save_content_deck(user_id, data.title, "quiz", questions)
@@ -187,7 +187,7 @@ Format:
 Write 4 to 8 key points. Write in the same language as the notes.
 
 Summarize these notes:
-{data.notes}"""
+{data.notes[:6000]}"""
 
     content = call_groq_json("You return only a valid JSON object. No markdown. No explanation.", prompt)
     deck_id = save_content_deck(user_id, data.title, "summary", content)
@@ -206,7 +206,7 @@ Format:
 Create 4 to 6 branches, each with 2 to 4 short children. Keep every label short (a few words, not full sentences). Write in the same language as the notes.
 
 Build a mind map from these notes:
-{data.notes}"""
+{data.notes[:6000]}"""
 
     content = call_groq_json("You return only a valid JSON object. No markdown. No explanation.", prompt)
     deck_id = save_content_deck(user_id, data.title, "mindmap", content)
