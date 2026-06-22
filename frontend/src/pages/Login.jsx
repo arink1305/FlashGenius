@@ -29,7 +29,7 @@ export default function Login() {
                 <div className="auth-left-content">
                     <span className="auth-left-icon">⚡</span>
                     <h2>Lær smartere</h2>
-                    <p>Gjør notater om til flashcards på sekunder og mestre ethvert fag raskere.</p>
+                    <p>Gjør notater om til studiesett på sekunder og mestre ethvert fag raskere.</p>
                 </div>
                 <div className="auth-features">
                     <div className="auth-feature"><span className="auth-feature-icon">🧠</span> AI genererer spørsmål automatisk</div>
