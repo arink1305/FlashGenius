@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, useParams, Link, Navigate } from "react-router-dom";
 import api from "../api";
+import { DECK_TYPES, deckRoute } from "../deckTypes";
 
 const difficulties = [
     { value: "easy", label: "Enkel", desc: "Korte, direkte svar", emoji: "🟢" },
@@ -8,27 +9,64 @@ const difficulties = [
     { value: "hard", label: "Vanskelig", desc: "Dype, detaljerte svar", emoji: "🔴" },
 ];
 
+const quizKinds = [
+    { value: "multiple", label: "Flervalg", desc: "4 alternativer per spørsmål", emoji: "🔢" },
+    { value: "yesno", label: "Ja / Nei", desc: "Påstander med ja eller nei", emoji: "✅" },
+];
+
+const endpoints = {
+    flashcards: "/flashcards/generate",
+    quiz: "/flashcards/generate-quiz",
+    summary: "/flashcards/generate-summary",
+    mindmap: "/flashcards/generate-mindmap",
+};
+
+const titlePlaceholders = {
+    flashcards: "F.eks. Kapittel 3 — Fotosyntese",
+    quiz: "F.eks. Quiz — Den franske revolusjon",
+    summary: "F.eks. Sammendrag — Cellebiologi",
+    mindmap: "F.eks. Tankekart — Andre verdenskrig",
+};
+
 export default function Generate() {
+    const { type } = useParams();
+    const navigate = useNavigate();
+
     const [title, setTitle] = useState("");
     const [notes, setNotes] = useState("");
-    const [count, setCount] = useState(8);
+    const [count, setCount] = useState(type === "quiz" ? 6 : 8);
     const [difficulty, setDifficulty] = useState("medium");
+    const [kind, setKind] = useState("multiple");
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
-    const navigate = useNavigate();
+
+    if (!DECK_TYPES[type]) return <Navigate to="/new" />;
+    const meta = DECK_TYPES[type];
 
     async function handleSubmit(e) {
         e.preventDefault();
-        setLoading(true);
         setError("");
+        setLoading(true);
+        const payload = { title, notes };
+        if (type === "flashcards") { payload.count = count; payload.difficulty = difficulty; }
+        if (type === "quiz") { payload.count = count; payload.kind = kind; }
         try {
-            const res = await api.post("/flashcards/generate", { title, notes, count, difficulty });
-            navigate(`/study/${res.data.deck_id}`);
+            const res = await api.post(endpoints[type], payload);
+            navigate(deckRoute(type, res.data.deck_id));
         } catch {
             setError("Noe gikk galt. Prøv igjen.");
             setLoading(false);
         }
     }
+
+    const submitLabel = {
+        flashcards: `✨ Generer ${count} flashcards`,
+        quiz: `✨ Generer ${count} spørsmål`,
+        summary: "✨ Lag sammendrag",
+        mindmap: "✨ Lag tankekart",
+    }[type];
+
+    const hasSidebar = type === "flashcards" || type === "quiz";
 
     return (
         <div className="page">
@@ -37,22 +75,22 @@ export default function Generate() {
                     <div className="topbar-logo-icon">⚡</div>
                     <span className="topbar-logo-name">FlashGenius</span>
                 </Link>
-                <Link to="/" className="btn-ghost">← Tilbake</Link>
+                <Link to="/new" className="btn-ghost">← Tilbake</Link>
             </header>
 
             <main className="content">
                 <div className="page-header">
-                    <h1>Generer flashcards ✨</h1>
-                    <p>Lim inn notatene dine og velg innstillinger.</p>
+                    <h1>{meta.icon} {meta.label}</h1>
+                    <p>Lim inn notatene dine{hasSidebar ? " og velg innstillinger" : ""} — AI-en gjør resten.</p>
                 </div>
 
-                <div className="generate-layout">
+                <div className={hasSidebar ? "generate-layout" : "generate-layout single"}>
                     <form onSubmit={handleSubmit} className="generate-form">
                         <label className="form-label">
-                            Tittel på settet
+                            Tittel
                             <input
                                 type="text"
-                                placeholder="F.eks. Kapittel 3 — Fotosyntese"
+                                placeholder={titlePlaceholders[type]}
                                 value={title}
                                 onChange={(e) => setTitle(e.target.value)}
                                 required
@@ -61,7 +99,7 @@ export default function Generate() {
                         <label className="form-label">
                             Notater
                             <textarea
-                                placeholder="Lim inn notatene dine her. Jo mer innhold, desto bedre flashcards."
+                                placeholder="Lim inn notatene dine her. Jo mer innhold, desto bedre resultat."
                                 value={notes}
                                 onChange={(e) => setNotes(e.target.value)}
                                 rows={14}
@@ -73,54 +111,80 @@ export default function Generate() {
                             {loading ? (
                                 <span className="loading-text">
                                     <span className="spinner" />
-                                    Genererer {count} kort...
+                                    Genererer...
                                 </span>
-                            ) : `✨ Generer ${count} flashcards`}
+                            ) : submitLabel}
                         </button>
                     </form>
 
-                    <div className="generate-sidebar">
-                        <div className="sidebar-card">
-                            <h3>Antall kort</h3>
-                            <div className="count-selector">
-                                {[5, 8, 10, 15, 20].map((n) => (
-                                    <button
-                                        key={n}
-                                        type="button"
-                                        className={`count-btn ${count === n ? "active" : ""}`}
-                                        onClick={() => setCount(n)}
-                                    >
-                                        {n}
-                                    </button>
-                                ))}
+                    {hasSidebar && (
+                        <div className="generate-sidebar">
+                            <div className="sidebar-card">
+                                <h3>Antall {type === "quiz" ? "spørsmål" : "kort"}</h3>
+                                <div className="count-selector">
+                                    {(type === "quiz" ? [5, 6, 8, 10, 12] : [5, 8, 10, 15, 20]).map((n) => (
+                                        <button
+                                            key={n}
+                                            type="button"
+                                            className={`count-btn ${count === n ? "active" : ""}`}
+                                            onClick={() => setCount(n)}
+                                        >
+                                            {n}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {type === "flashcards" && (
+                                <div className="sidebar-card">
+                                    <h3>Vanskelighetsgrad</h3>
+                                    <div className="difficulty-selector">
+                                        {difficulties.map((d) => (
+                                            <button
+                                                key={d.value}
+                                                type="button"
+                                                className={`difficulty-btn ${difficulty === d.value ? "active" : ""}`}
+                                                onClick={() => setDifficulty(d.value)}
+                                            >
+                                                <span>{d.emoji}</span>
+                                                <span className="difficulty-text">
+                                                    <span className="difficulty-label">{d.label}</span>
+                                                    <span className="difficulty-desc">{d.desc}</span>
+                                                </span>
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            {type === "quiz" && (
+                                <div className="sidebar-card">
+                                    <h3>Type spørsmål</h3>
+                                    <div className="difficulty-selector">
+                                        {quizKinds.map((k) => (
+                                            <button
+                                                key={k.value}
+                                                type="button"
+                                                className={`difficulty-btn ${kind === k.value ? "active" : ""}`}
+                                                onClick={() => setKind(k.value)}
+                                            >
+                                                <span>{k.emoji}</span>
+                                                <span className="difficulty-text">
+                                                    <span className="difficulty-label">{k.label}</span>
+                                                    <span className="difficulty-desc">{k.desc}</span>
+                                                </span>
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            <div className="generate-tip">
+                                <strong>💡 Tips</strong>
+                                Jo mer detaljerte notater du limer inn, desto bedre og mer presist blir resultatet.
                             </div>
                         </div>
-
-                        <div className="sidebar-card">
-                            <h3>Vanskelighetsgrad</h3>
-                            <div className="difficulty-selector">
-                                {difficulties.map((d) => (
-                                    <button
-                                        key={d.value}
-                                        type="button"
-                                        className={`difficulty-btn ${difficulty === d.value ? "active" : ""}`}
-                                        onClick={() => setDifficulty(d.value)}
-                                    >
-                                        <span>{d.emoji}</span>
-                                        <span className="difficulty-text">
-                                            <span className="difficulty-label">{d.label}</span>
-                                            <span className="difficulty-desc">{d.desc}</span>
-                                        </span>
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-
-                        <div className="generate-tip">
-                            <strong>💡 Tips</strong>
-                            Jo mer detaljerte notater du limer inn, desto bedre og mer presise flashcards får du.
-                        </div>
-                    </div>
+                    )}
                 </div>
             </main>
         </div>

@@ -1,8 +1,14 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import api from "../api";
+import { DECK_TYPES, deckRoute } from "../deckTypes";
 
-const icons = ["📚", "🧠", "🔬", "📐", "🌍", "💡", "🎯", "⚗️", "📊", "🖥️", "🎨", "🏛️"];
+const actionLabel = {
+    flashcards: "Studer →",
+    quiz: "Start quiz →",
+    summary: "Les →",
+    mindmap: "Åpne →",
+};
 
 function getEmail() {
     try {
@@ -57,7 +63,7 @@ export default function Dashboard() {
                     <span className="topbar-logo-name">FlashGenius</span>
                 </Link>
                 <div className="topbar-actions">
-                    <Link to="/generate" className="btn-primary">+ Nytt sett</Link>
+                    <Link to="/new" className="btn-primary">+ Nytt sett</Link>
                     <Link to="/settings" className="topbar-icon-btn" title="Innstillinger">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                             <circle cx="12" cy="12" r="3"/>
@@ -80,7 +86,7 @@ export default function Dashboard() {
                                 <div className="profile-divider" />
                                 <div className="profile-meta">
                                     <div className="profile-meta-row">
-                                        <span>Flashcard-sett</span>
+                                        <span>Antall sett</span>
                                         <strong>{decks.length}</strong>
                                     </div>
                                     <div className="profile-meta-row">
@@ -106,8 +112,8 @@ export default function Dashboard() {
             <main className="content">
                 <div className="dash-hero">
                     <div className="dash-hero-text">
-                        <h1>Mine flashcard-sett 🧠</h1>
-                        <p>Lim inn notater og la AI-en lage flashcards på sekunder</p>
+                        <h1>Mine sett 🧠</h1>
+                        <p>Lim inn notater og la AI-en lage flashcards, quiz, sammendrag eller tankekart</p>
                     </div>
                 </div>
 
@@ -117,25 +123,31 @@ export default function Dashboard() {
                     <div className="empty-state">
                         <div className="empty-icon">📭</div>
                         <h3>Ingen sett ennå</h3>
-                        <p>Lag ditt første flashcard-sett </p>
-                        <Link to="/generate" className="btn-primary">✨ Kom i gang</Link>
+                        <p>Lag ditt første sett med AI</p>
+                        <Link to="/new" className="btn-primary">✨ Kom i gang</Link>
                     </div>
                 ) : (
                     <div className="deck-grid">
-                        {decks.map((deck, i) => (
-                            <div key={deck.id} className="deck-card" style={{ animationDelay: `${i * 0.06}s` }}>
-                                <div className="deck-card-stripe" />
-                                <span className="deck-card-icon">{icons[i % icons.length]}</span>
-                                <h3>{deck.title}</h3>
-                                <p className="deck-card-date">
-                                    {new Date(deck.created_at).toLocaleDateString("nb-NO", { day: "numeric", month: "long", year: "numeric" })}
-                                </p>
-                                <div className="deck-actions">
-                                    <Link to={`/study/${deck.id}`} className="btn-primary">Studer →</Link>
-                                    <button onClick={() => deleteDeck(deck.id)} className="btn-danger">Slett</button>
+                        {decks.map((deck, i) => {
+                            const meta = DECK_TYPES[deck.type] || DECK_TYPES.flashcards;
+                            return (
+                                <div key={deck.id} className="deck-card" style={{ animationDelay: `${i * 0.06}s` }}>
+                                    <div className="deck-card-stripe" />
+                                    <div className="deck-card-top">
+                                        <span className="deck-card-icon">{meta.icon}</span>
+                                        <span className="deck-type-badge">{meta.label}</span>
+                                    </div>
+                                    <h3>{deck.title}</h3>
+                                    <p className="deck-card-date">
+                                        {new Date(deck.created_at).toLocaleDateString("nb-NO", { day: "numeric", month: "long", year: "numeric" })}
+                                    </p>
+                                    <div className="deck-actions">
+                                        <Link to={deckRoute(deck.type, deck.id)} className="btn-primary">{actionLabel[deck.type] || "Åpne →"}</Link>
+                                        <button onClick={() => deleteDeck(deck.id)} className="btn-danger">Slett</button>
+                                    </div>
                                 </div>
-                            </div>
-                        ))}
+                            );
+                        })}
                     </div>
                 )}
             </main>

@@ -2,9 +2,9 @@
 
 # ⚡ FlashGenius
 
-### Turn your notes into AI-generated flashcards in seconds
+### Turn your notes into AI-generated study material in seconds
 
-Paste any text, pick how many cards and how hard you want them, and let AI build a study set you can review with a clean card-flip interface.
+Paste any text and let AI build **flashcards, quizzes, summaries, or mind maps** — then study them with clean, interactive interfaces.
 
 <br/>
 
@@ -31,16 +31,23 @@ Paste any text, pick how many cards and how hard you want them, and let AI build
 
 ## ✨ Features
 
-- 🤖 **AI-powered generation** — paste notes and get well-formed Q&A flashcards back in seconds, powered by Llama 3.1 via the Groq API
-- 🎚️ **Configurable output** — choose how many cards (5–20) and the difficulty (easy / medium / hard)
-- 🔐 **Accounts & authentication** — register and log in with JWT-based auth and bcrypt-hashed passwords
-- 📚 **Personal library** — every set is saved to your account and shown on a clean dashboard
-- 🃏 **Study mode** — flip cards, track progress with a live progress bar, and get a completion screen when you're done
+**Four AI generation modes** — pick what to create from your notes:
+
+- 🃏 **Flashcards** — Q&A cards with configurable count (5–20) and difficulty (easy / medium / hard), studied with a card-flip interface
+- ❓ **Quizzes** — multiple-choice (4 options) or yes/no questions, answered interactively with instant feedback and a score
+- 📝 **Summaries** — a structured summary plus a list of key points
+- 🧠 **Mind maps** — notes turned into a visual map with a central topic and colored branches
+
+Plus everything around it:
+
+- 🤖 **Powered by Llama 3.1** via the Groq API, with robust JSON parsing (retry + salvage) so generations don't fail
+- 🔐 **Accounts & authentication** — JWT-based auth with bcrypt-hashed passwords
+- 📚 **Personal library** — every set is saved to your account, tagged by type, on a clean dashboard
 - 🌗 **Light & dark mode** — switch themes instantly, preference is remembered
 - 🌍 **Bilingual UI** — toggle between Norwegian and English
 - 📤 **Export your data** — download all your sets as JSON
 - ⚙️ **Account management** — change password, export data, or delete your account
-- 🏠 **Public landing page** — browse the app before signing up; an account is only required to generate cards
+- 🏠 **Public landing page** — browse the app before signing up; an account is only required to generate content
 
 <br/>
 
@@ -49,22 +56,32 @@ Paste any text, pick how many cards and how hard you want them, and let AI build
 <table>
   <tr>
     <td width="50%">
-      <strong>Dashboard</strong><br/>
-      <img src="screenshots/dashboard.png" alt="Dashboard" />
+      <strong>Choose what to generate</strong><br/>
+      <img src="screenshots/newset.png" alt="Generation mode chooser" />
     </td>
     <td width="50%">
-      <strong>Generate flashcards</strong><br/>
-      <img src="screenshots/generate.png" alt="Generate page" />
+      <strong>Dashboard</strong><br/>
+      <img src="screenshots/dashboard.png" alt="Dashboard" />
     </td>
   </tr>
   <tr>
     <td width="50%">
-      <strong>Study mode</strong><br/>
-      <img src="screenshots/study.png" alt="Study mode — question side" />
+      <strong>Quiz mode</strong><br/>
+      <img src="screenshots/quiz.png" alt="Interactive quiz" />
     </td>
     <td width="50%">
-      <strong>Card flipped to the answer</strong><br/>
-      <img src="screenshots/study-flipped.png" alt="Study mode — answer side" />
+      <strong>Flashcard study mode</strong><br/>
+      <img src="screenshots/study-flipped.png" alt="Flashcard study mode" />
+    </td>
+  </tr>
+  <tr>
+    <td width="50%">
+      <strong>AI summary</strong><br/>
+      <img src="screenshots/summary.png" alt="Summary view" />
+    </td>
+    <td width="50%">
+      <strong>Mind map</strong><br/>
+      <img src="screenshots/mindmap.png" alt="Mind map view" />
     </td>
   </tr>
   <tr>
