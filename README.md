@@ -114,7 +114,14 @@ Paste any text, pick how many cards and how hard you want them, and let AI build
 
 <br/>
 
-## 🚀 Getting started
+## 🚀 Running locally
+
+The app is **live above** — but you can also clone and run it yourself.
+
+<details>
+<summary><strong>Click to expand local setup instructions</strong></summary>
+
+<br/>
 
 ### Prerequisites
 
@@ -170,6 +177,8 @@ npm run dev
 ```
 
 The app runs on **http://localhost:5173**.
+
+</details>
 
 <br/>
 
