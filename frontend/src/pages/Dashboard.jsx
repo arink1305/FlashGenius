@@ -123,7 +123,7 @@ export default function Dashboard() {
                     <div className="empty-state">
                         <div className="empty-icon">📭</div>
                         <h3>Ingen sett ennå</h3>
-                        <p>Lag ditt første sett med AI</p>
+                        <p>Lag ditt første sett</p>
                         <Link to="/new" className="btn-primary">✨ Kom i gang</Link>
                     </div>
                 ) : (
