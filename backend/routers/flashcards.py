@@ -200,10 +200,18 @@ def generate_mindmap(data: MindmapIn, authorization: str = Header(...)):
 
     prompt = f"""You are a mind map generator. Return ONLY a JSON object, no markdown, no explanation.
 
-Format:
-{{"central": "main topic", "branches": [{{"title": "branch name", "children": ["idea", "idea"]}}]}}
+Format (a recursive tree — every node has "title" and "children"):
+{{"title": "central topic", "children": [{{"title": "main branch", "children": [{{"title": "subtopic", "children": [{{"title": "detail", "children": []}}]}}]}}]}}
 
-Create 4 to 6 branches, each with 2 to 4 short children. Keep every label short (a few words, not full sentences). Write in the same language as the notes.
+Rules:
+- The root "title" is the overall topic.
+- Create 4 to 6 main branches.
+- Each main branch has 2 to 4 subtopics.
+- Some subtopics may have 1 to 3 short details (go at most 3 levels deep below the root).
+- Keep every label short: 1 to 4 words, not a full sentence.
+- Leaf nodes must have "children": [].
+- The root object itself must use the "title" key — do NOT use the topic name as an object key.
+- Write in the same language as the notes.
 
 Build a mind map from these notes:
 {data.notes[:6000]}"""
