@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import Logo from "../components/Logo";
 import api from "../api";
 import { useLang } from "../i18n";
 
@@ -49,7 +50,7 @@ export default function Settings() {
         <div className="page">
             <header className="topbar">
                 <Link to="/" className="topbar-logo">
-                    <div className="topbar-logo-icon">⚡</div>
+                    <Logo className="topbar-logo-icon" />
                     <span className="topbar-logo-name">FlashGenius</span>
                 </Link>
                 <Link to="/" className="btn-ghost">{t("back")}</Link>

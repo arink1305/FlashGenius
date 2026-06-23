@@ -1,4 +1,5 @@
 import { Link, useNavigate } from "react-router-dom";
+import Logo from "../components/Logo";
 import { DECK_TYPES } from "../deckTypes";
 import { useLang } from "../i18n";
 
@@ -12,7 +13,7 @@ export default function NewSet() {
         <div className="page">
             <header className="topbar">
                 <Link to="/" className="topbar-logo">
-                    <div className="topbar-logo-icon">⚡</div>
+                    <Logo className="topbar-logo-icon" />
                     <span className="topbar-logo-name">FlashGenius</span>
                 </Link>
                 <Link to="/" className="btn-ghost">{t("back")}</Link>

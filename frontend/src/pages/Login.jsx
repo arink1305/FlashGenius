@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import Logo from "../components/Logo";
 import api from "../api";
 import { useLang } from "../i18n";
 
@@ -42,7 +43,7 @@ export default function Login() {
             <div className="auth-right">
                 <div className="auth-card">
                     <div className="auth-logo">
-                        <div className="auth-logo-icon">⚡</div>
+                        <Logo className="auth-logo-icon" />
                         <span className="auth-logo-name">FlashGenius</span>
                     </div>
                     <h2 className="auth-title">{t("welcomeBack")}</h2>

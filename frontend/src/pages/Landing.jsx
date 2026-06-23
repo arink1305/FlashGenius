@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import Logo from "../components/Logo";
 import { useLang } from "../i18n";
 
 export default function Landing() {
@@ -14,7 +15,7 @@ export default function Landing() {
         <div className="landing">
             <header className="topbar">
                 <div className="topbar-logo">
-                    <div className="topbar-logo-icon">⚡</div>
+                    <Logo className="topbar-logo-icon" />
                     <span className="topbar-logo-name">FlashGenius</span>
                 </div>
                 <div className="topbar-actions">

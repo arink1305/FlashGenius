@@ -258,11 +258,7 @@ input:focus, textarea:focus {
 .topbar-logo-icon {
     width: 40px; height: 40px;
     border-radius: 12px;
-    background: var(--grad-main);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.2rem;
+    display: block;
     box-shadow: 0 4px 14px rgba(99,102,241,0.35);
 }
 
@@ -539,11 +535,7 @@ input:focus, textarea:focus {
 .auth-logo-icon {
     width: 40px; height: 40px;
     border-radius: 12px;
-    background: var(--grad-main);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.3rem;
+    display: block;
     box-shadow: 0 4px 16px rgba(99,102,241,0.3);
 }
 
@@ -934,6 +926,65 @@ input:focus, textarea:focus {
 }
 
 .generate-tip strong { display: block; margin-bottom: 4px; font-weight: 700; }
+
+.notes-label-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.upload-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 7px 13px;
+    border-radius: 9px;
+    border: 1.5px solid var(--border);
+    background: var(--bg);
+    color: var(--accent);
+    font-family: inherit;
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: none;
+    letter-spacing: 0;
+    cursor: pointer;
+    transition: all 160ms;
+}
+
+.upload-btn:hover { border-color: var(--accent); background: rgba(99,102,241,0.06); }
+.upload-btn:disabled { opacity: 0.6; cursor: default; }
+
+.spinner-dark {
+    border: 2px solid rgba(99,102,241,0.25);
+    border-top-color: var(--accent);
+}
+
+.notes-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: -2px;
+}
+
+.upload-hint {
+    font-size: 0.72rem;
+    font-weight: 500;
+    color: var(--muted);
+    text-transform: none;
+    letter-spacing: 0;
+}
+
+.char-count {
+    font-size: 0.74rem;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: none;
+    letter-spacing: 0;
+}
+
+.char-count.over { color: var(--danger); }
+
+[data-theme="dark"] .upload-btn { background: #0f0e1a; }
 
 .study-content { display: flex; flex-direction: column; align-items: center; }
 
