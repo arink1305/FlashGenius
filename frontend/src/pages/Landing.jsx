@@ -1,13 +1,15 @@
 import { Link } from "react-router-dom";
-
-const features = [
-    { icon: "⚡", title: "Lynrask generering", desc: "Lim inn notater og få flashcards på sekunder med AI." },
-    { icon: "🎯", title: "Velg vanskelighetsgrad", desc: "Enkel, medium eller vanskelig — tilpass til ditt nivå." },
-    { icon: "🧠", title: "Lær smartere", desc: "Kortbasert repetisjon som faktisk fungerer." },
-    { icon: "📊", title: "Hold oversikt", desc: "Alle settene dine samlet på ett sted." },
-];
+import { useLang } from "../i18n";
 
 export default function Landing() {
+    const { t } = useLang();
+    const features = [
+        { icon: "⚡", title: t("feat1Title"), desc: t("feat1Desc") },
+        { icon: "🎯", title: t("feat2Title"), desc: t("feat2Desc") },
+        { icon: "🧠", title: t("feat3Title"), desc: t("feat3Desc") },
+        { icon: "📊", title: t("feat4Title"), desc: t("feat4Desc") },
+    ];
+
     return (
         <div className="landing">
             <header className="topbar">
@@ -16,38 +18,36 @@ export default function Landing() {
                     <span className="topbar-logo-name">FlashGenius</span>
                 </div>
                 <div className="topbar-actions">
-                    <Link to="/login" className="btn-ghost">Logg inn</Link>
-                    <Link to="/register" className="btn-primary">Kom i gang gratis</Link>
+                    <Link to="/login" className="btn-ghost">{t("navLogin")}</Link>
+                    <Link to="/register" className="btn-primary">{t("navStart")}</Link>
                 </div>
             </header>
 
             <section className="landing-hero">
                 <div className="landing-hero-inner">
-                    <div className="landing-badge">✨ Drevet av Groq AI</div>
+                    <div className="landing-badge">{t("heroBadge")}</div>
                     <h1 className="landing-title">
-                        Gjør notater om til<br />
-                        <span className="landing-title-grad">flashcards på sekunder</span>
+                        {t("heroTitle1")}<br />
+                        <span className="landing-title-grad">{t("heroTitle2")}</span>
                     </h1>
-                    <p className="landing-sub">
-                        Lim inn tekstene dine og la AI-en lage perfekte studiekort. Velg antall kort og vanskelighetsgrad — resten ordner seg selv.
-                    </p>
+                    <p className="landing-sub">{t("heroSub")}</p>
                     <div className="landing-ctas">
-                        <Link to="/register" className="btn-primary landing-cta-main">Opprett gratis konto →</Link>
-                        <Link to="/login" className="btn-ghost">Logg inn</Link>
+                        <Link to="/register" className="btn-primary landing-cta-main">{t("ctaCreate")}</Link>
+                        <Link to="/login" className="btn-ghost">{t("navLogin")}</Link>
                     </div>
                 </div>
                 <div className="landing-hero-card">
                     <div className="landing-card-mock">
-                        <div className="mock-label">Spørsmål</div>
-                        <p className="mock-question">Hva er fotosyntese?</p>
-                        <div className="mock-flip">Klikk for å snu ↓</div>
+                        <div className="mock-label">{t("mockLabel")}</div>
+                        <p className="mock-question">{t("mockQuestion")}</p>
+                        <div className="mock-flip">{t("mockFlip")}</div>
                     </div>
                 </div>
             </section>
 
             <section className="landing-features">
                 <div className="landing-features-inner">
-                    <h2 className="landing-section-title">Alt du trenger for å lære</h2>
+                    <h2 className="landing-section-title">{t("featuresTitle")}</h2>
                     <div className="landing-feature-grid">
                         {features.map((f) => (
                             <div key={f.title} className="landing-feature-card">
@@ -61,9 +61,9 @@ export default function Landing() {
             </section>
 
             <section className="landing-cta-section">
-                <h2>Klar til å lære smartere?</h2>
-                <p>Gratis — ingen kredittkort nødvendig.</p>
-                <Link to="/register" className="btn-primary landing-cta-main">Kom i gang nå →</Link>
+                <h2>{t("ctaSectionTitle")}</h2>
+                <p>{t("ctaSectionSub")}</p>
+                <Link to="/register" className="btn-primary landing-cta-main">{t("ctaSectionBtn")}</Link>
             </section>
         </div>
     );

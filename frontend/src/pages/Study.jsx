@@ -1,9 +1,11 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import api from "../api";
+import { useLang } from "../i18n";
 
 export default function Study() {
     const { deckId } = useParams();
+    const { t } = useLang();
     const [deck, setDeck] = useState(null);
     const [index, setIndex] = useState(0);
     const [flipped, setFlipped] = useState(false);
@@ -51,19 +53,19 @@ export default function Study() {
                     <div className="topbar-logo-icon">⚡</div>
                     <span className="topbar-logo-name">FlashGenius</span>
                 </Link>
-                <Link to="/" className="btn-ghost">← Tilbake</Link>
+                <Link to="/" className="btn-ghost">{t("back")}</Link>
             </header>
 
             <main className="content study-content">
                 {done ? (
                     <div className="study-complete">
                         <div className="complete-icon">🎉</div>
-                        <div className="complete-badge">FULLFØRT</div>
-                        <h2>Bra jobbet!</h2>
-                        <p>Du gikk gjennom alle <strong>{total} kortene</strong> i «{deck.title}».</p>
+                        <div className="complete-badge">{t("completed")}</div>
+                        <h2>{t("wellDone")}</h2>
+                        <p>{t("studyDoneText", { n: total })}</p>
                         <div className="study-nav" style={{ marginTop: "8px" }}>
-                            <button onClick={restart} className="btn-primary">🔄 Ta en runde til</button>
-                            <Link to="/" className="btn-ghost">← Tilbake til oversikten</Link>
+                            <button onClick={restart} className="btn-primary">{t("againRound")}</button>
+                            <Link to="/" className="btn-ghost">{t("backToOverview")}</Link>
                         </div>
                     </div>
                 ) : (
@@ -71,9 +73,9 @@ export default function Study() {
                         <div className="study-hero">
                             <div className="study-hero-text">
                                 <h1>{deck.title}</h1>
-                                <p>Klikk på kortet for å se svaret</p>
+                                <p>{t("studySub")}</p>
                             </div>
-                            <Link to="/" className="btn-white-outline">← Avslutt</Link>
+                            <Link to="/" className="btn-white-outline">{t("exit")}</Link>
                         </div>
 
                         <div className="progress-wrap">
@@ -81,30 +83,30 @@ export default function Study() {
                                 <div className="progress-bar-fill" style={{ width: `${progress}%` }} />
                             </div>
                             <div className="progress-meta">
-                                <span>Kort {index + 1} av {total}</span>
-                                <span>{Math.round(progress)}% fullført</span>
+                                <span>{t("cardOf", { i: index + 1, n: total })}</span>
+                                <span>{t("percentDone", { p: Math.round(progress) })}</span>
                             </div>
                         </div>
 
                         <div className={`flashcard ${flipped ? "flipped" : ""}`} onClick={() => setFlipped(!flipped)}>
                             <div className="flashcard-inner">
                                 <div className="flashcard-front">
-                                    <span className="card-label">Spørsmål</span>
+                                    <span className="card-label">{t("question")}</span>
                                     <p>{card.question}</p>
                                 </div>
                                 <div className="flashcard-back">
-                                    <span className="card-label">Svar</span>
+                                    <span className="card-label">{t("answer")}</span>
                                     <p>{card.answer}</p>
                                 </div>
                             </div>
                         </div>
 
-                        <p className="flip-hint">👆 Klikk for å snu kortet</p>
+                        <p className="flip-hint">{t("flipHint")}</p>
 
                         <div className="study-nav">
-                            <button onClick={prev} disabled={index === 0} className="btn-ghost">← Forrige</button>
+                            <button onClick={prev} disabled={index === 0} className="btn-ghost">{t("prev")}</button>
                             <button onClick={next} className="btn-primary">
-                                {index === total - 1 ? "Fullfør ✓" : "Neste →"}
+                                {index === total - 1 ? t("finish") : t("next")}
                             </button>
                         </div>
                     </>

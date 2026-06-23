@@ -2,12 +2,7 @@ import { useState } from "react";
 import { useNavigate, useParams, Link, Navigate } from "react-router-dom";
 import api from "../api";
 import { DECK_TYPES, deckRoute } from "../deckTypes";
-
-const difficulties = [
-    { value: "easy", label: "Enkel", desc: "Korte, direkte svar", emoji: "🟢" },
-    { value: "medium", label: "Medium", desc: "Forklaring inkludert", emoji: "🟡" },
-    { value: "hard", label: "Vanskelig", desc: "Dype, detaljerte svar", emoji: "🔴" },
-];
+import { useLang } from "../i18n";
 
 const endpoints = {
     flashcards: "/flashcards/generate",
@@ -16,16 +11,10 @@ const endpoints = {
     mindmap: "/flashcards/generate-mindmap",
 };
 
-const titlePlaceholders = {
-    flashcards: "F.eks. Kapittel 3 — Fotosyntese",
-    quiz: "F.eks. Quiz — Den franske revolusjon",
-    summary: "F.eks. Sammendrag — Cellebiologi",
-    mindmap: "F.eks. Tankekart — Andre verdenskrig",
-};
-
 export default function Generate() {
     const { type } = useParams();
     const navigate = useNavigate();
+    const { t } = useLang();
 
     const [title, setTitle] = useState("");
     const [notes, setNotes] = useState("");
@@ -36,6 +25,12 @@ export default function Generate() {
 
     if (!DECK_TYPES[type]) return <Navigate to="/new" />;
     const meta = DECK_TYPES[type];
+
+    const difficulties = [
+        { value: "easy", label: t("diffEasyLabel"), desc: t("diffEasyDesc"), emoji: "🟢" },
+        { value: "medium", label: t("diffMediumLabel"), desc: t("diffMediumDesc"), emoji: "🟡" },
+        { value: "hard", label: t("diffHardLabel"), desc: t("diffHardDesc"), emoji: "🔴" },
+    ];
 
     async function handleSubmit(e) {
         e.preventDefault();
@@ -48,16 +43,16 @@ export default function Generate() {
             const res = await api.post(endpoints[type], payload);
             navigate(deckRoute(type, res.data.deck_id));
         } catch {
-            setError("Noe gikk galt. Prøv igjen.");
+            setError(t("genError"));
             setLoading(false);
         }
     }
 
     const submitLabel = {
-        flashcards: `✨ Generer ${count} flashcards`,
-        quiz: `✨ Generer ${count} spørsmål`,
-        summary: "✨ Lag sammendrag",
-        mindmap: "✨ Lag tankekart",
+        flashcards: t("submitFlashcards", { n: count }),
+        quiz: t("submitQuiz", { n: count }),
+        summary: t("submitSummary"),
+        mindmap: t("submitMindmap"),
     }[type];
 
     const hasSidebar = type === "flashcards" || type === "quiz";
@@ -69,31 +64,31 @@ export default function Generate() {
                     <div className="topbar-logo-icon">⚡</div>
                     <span className="topbar-logo-name">FlashGenius</span>
                 </Link>
-                <Link to="/new" className="btn-ghost">← Tilbake</Link>
+                <Link to="/new" className="btn-ghost">{t("back")}</Link>
             </header>
 
             <main className="content">
                 <div className="page-header">
-                    <h1>{meta.icon} {meta.label}</h1>
-                    <p>Lim inn notatene dine{hasSidebar ? " og velg innstillinger" : ""} — AI-en gjør resten.</p>
+                    <h1>{meta.icon} {t(meta.labelKey)}</h1>
+                    <p>{hasSidebar ? t("genSubSidebar") : t("genSubPlain")}</p>
                 </div>
 
                 <div className={hasSidebar ? "generate-layout" : "generate-layout single"}>
                     <form onSubmit={handleSubmit} className="generate-form">
                         <label className="form-label">
-                            Tittel
+                            {t("titleLabel")}
                             <input
                                 type="text"
-                                placeholder={titlePlaceholders[type]}
+                                placeholder={t(`titlePh_${type}`)}
                                 value={title}
                                 onChange={(e) => setTitle(e.target.value)}
                                 required
                             />
                         </label>
                         <label className="form-label">
-                            Notater
+                            {t("notesLabel")}
                             <textarea
-                                placeholder="Lim inn notatene dine her. Jo mer innhold, desto bedre resultat."
+                                placeholder={t("notesPlaceholder")}
                                 value={notes}
                                 onChange={(e) => setNotes(e.target.value)}
                                 rows={14}
@@ -105,7 +100,7 @@ export default function Generate() {
                             {loading ? (
                                 <span className="loading-text">
                                     <span className="spinner" />
-                                    Genererer...
+                                    {t("generating")}
                                 </span>
                             ) : submitLabel}
                         </button>
@@ -114,7 +109,7 @@ export default function Generate() {
                     {hasSidebar && (
                         <div className="generate-sidebar">
                             <div className="sidebar-card">
-                                <h3>Antall {type === "quiz" ? "spørsmål" : "kort"}</h3>
+                                <h3>{type === "quiz" ? t("countQuestions") : t("countCards")}</h3>
                                 <div className="count-selector">
                                     {(type === "quiz" ? [5, 6, 8, 10, 12] : [5, 8, 10, 15, 20]).map((n) => (
                                         <button
@@ -131,7 +126,7 @@ export default function Generate() {
 
                             {type === "flashcards" && (
                                 <div className="sidebar-card">
-                                    <h3>Vanskelighetsgrad</h3>
+                                    <h3>{t("difficulty")}</h3>
                                     <div className="difficulty-selector">
                                         {difficulties.map((d) => (
                                             <button
@@ -153,14 +148,14 @@ export default function Generate() {
 
                             {type === "quiz" && (
                                 <div className="generate-tip">
-                                    <strong>🎲 Blandet quiz</strong>
-                                    Du får en miks av flervalg (4 alternativer) og ja/nei-spørsmål automatisk.
+                                    <strong>{t("quizMixTitle")}</strong>
+                                    {t("quizMixDesc")}
                                 </div>
                             )}
 
                             <div className="generate-tip">
-                                <strong>💡 Tips</strong>
-                                Jo mer detaljerte notater du limer inn, desto bedre og mer presist blir resultatet.
+                                <strong>{t("tipTitle")}</strong>
+                                {t("tipDesc")}
                             </div>
                         </div>
                     )}

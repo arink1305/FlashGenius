@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import api from "../api";
+import { useLang } from "../i18n";
 
 export default function Register() {
+    const { t } = useLang();
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [confirm, setConfirm] = useState("");
@@ -14,7 +16,7 @@ export default function Register() {
         e.preventDefault();
         setError("");
         if (password !== confirm) {
-            setError("Passordene er ikke like");
+            setError(t("passwordsMismatch"));
             return;
         }
         setLoading(true);
@@ -23,7 +25,7 @@ export default function Register() {
             localStorage.setItem("token", res.data.token);
             navigate("/");
         } catch {
-            setError("E-posten er allerede registrert");
+            setError(t("emailTaken"));
             setLoading(false);
         }
     }
@@ -33,13 +35,13 @@ export default function Register() {
             <div className="auth-left">
                 <div className="auth-left-content">
                     <span className="auth-left-icon">🚀</span>
-                    <h2>Kom i gang gratis</h2>
-                    <p>Opprett en konto og begynn å lage AI-drevne flashcards på sekunder.</p>
+                    <h2>{t("registerLeftTitle")}</h2>
+                    <p>{t("registerLeftSub")}</p>
                 </div>
                 <div className="auth-features">
-                    <div className="auth-feature"><span className="auth-feature-icon">✨</span> Ubegrenset antall flashcard-sett</div>
-                    <div className="auth-feature"><span className="auth-feature-icon">🎯</span> Tilpass vanskelighetsgrad</div>
-                    <div className="auth-feature"><span className="auth-feature-icon">🔒</span> Sikkert og personlig</div>
+                    <div className="auth-feature"><span className="auth-feature-icon">✨</span> {t("regFeat1")}</div>
+                    <div className="auth-feature"><span className="auth-feature-icon">🎯</span> {t("regFeat2")}</div>
+                    <div className="auth-feature"><span className="auth-feature-icon">🔒</span> {t("regFeat3")}</div>
                 </div>
             </div>
             <div className="auth-right">
@@ -48,18 +50,18 @@ export default function Register() {
                         <div className="auth-logo-icon">⚡</div>
                         <span className="auth-logo-name">FlashGenius</span>
                     </div>
-                    <h2 className="auth-title">Opprett konto</h2>
-                    <p className="auth-subtitle">Gratis — ingen kredittkort nødvendig</p>
+                    <h2 className="auth-title">{t("createAccount")}</h2>
+                    <p className="auth-subtitle">{t("createSubtitle")}</p>
                     <form className="auth-form" onSubmit={handleSubmit}>
-                        <input type="email" placeholder="E-post" value={email} onChange={(e) => setEmail(e.target.value)} required />
-                        <input type="password" placeholder="Passord (minst 6 tegn)" value={password} onChange={(e) => setPassword(e.target.value)} minLength={6} required />
-                        <input type="password" placeholder="Bekreft passord" value={confirm} onChange={(e) => setConfirm(e.target.value)} minLength={6} required />
+                        <input type="email" placeholder={t("emailPlaceholder")} value={email} onChange={(e) => setEmail(e.target.value)} required />
+                        <input type="password" placeholder={t("passwordHint")} value={password} onChange={(e) => setPassword(e.target.value)} minLength={6} required />
+                        <input type="password" placeholder={t("confirmPassword")} value={confirm} onChange={(e) => setConfirm(e.target.value)} minLength={6} required />
                         {error && <p className="error">{error}</p>}
                         <button type="submit" className="btn-primary" disabled={loading}>
-                            {loading ? "Oppretter konto..." : "Opprett konto"}
+                            {loading ? t("creatingAccount") : t("createAccount")}
                         </button>
                     </form>
-                    <p className="auth-link">Har allerede konto? <Link to="/login">Logg inn</Link></p>
+                    <p className="auth-link">{t("haveAccount")} <Link to="/login">{t("loginBtn")}</Link></p>
                 </div>
             </div>
         </div>

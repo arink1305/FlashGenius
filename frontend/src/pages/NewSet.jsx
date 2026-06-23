@@ -1,10 +1,12 @@
 import { Link, useNavigate } from "react-router-dom";
 import { DECK_TYPES } from "../deckTypes";
+import { useLang } from "../i18n";
 
 const order = ["flashcards", "quiz", "summary", "mindmap"];
 
 export default function NewSet() {
     const navigate = useNavigate();
+    const { t } = useLang();
 
     return (
         <div className="page">
@@ -13,18 +15,17 @@ export default function NewSet() {
                     <div className="topbar-logo-icon">⚡</div>
                     <span className="topbar-logo-name">FlashGenius</span>
                 </Link>
-                <Link to="/" className="btn-ghost">← Tilbake</Link>
+                <Link to="/" className="btn-ghost">{t("back")}</Link>
             </header>
 
             <main className="content">
                 <div className="page-header">
-                    <h1>Hva vil du lage? ✨</h1>
-                    <p></p>
+                    <h1>{t("newSetTitle")}</h1>
                 </div>
 
                 <div className="type-grid">
                     {order.map((key, i) => {
-                        const t = DECK_TYPES[key];
+                        const meta = DECK_TYPES[key];
                         return (
                             <button
                                 key={key}
@@ -33,10 +34,10 @@ export default function NewSet() {
                                 onClick={() => navigate(`/generate/${key}`)}
                             >
                                 <div className="type-card-stripe" />
-                                <span className="type-card-icon">{t.icon}</span>
-                                <h3>{t.label}</h3>
-                                <p>{t.desc}</p>
-                                <span className="type-card-go">Velg →</span>
+                                <span className="type-card-icon">{meta.icon}</span>
+                                <h3>{t(meta.labelKey)}</h3>
+                                <p>{t(meta.descKey)}</p>
+                                <span className="type-card-go">{t("choose")}</span>
                             </button>
                         );
                     })}

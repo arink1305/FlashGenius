@@ -1,9 +1,11 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import api from "../api";
+import { useLang } from "../i18n";
 
 export default function Quiz() {
     const { deckId } = useParams();
+    const { t } = useLang();
     const [deck, setDeck] = useState(null);
     const [index, setIndex] = useState(0);
     const [selected, setSelected] = useState(null);
@@ -64,19 +66,19 @@ export default function Quiz() {
                     <div className="topbar-logo-icon">⚡</div>
                     <span className="topbar-logo-name">FlashGenius</span>
                 </Link>
-                <Link to="/" className="btn-ghost">← Tilbake</Link>
+                <Link to="/" className="btn-ghost">{t("back")}</Link>
             </header>
 
             <main className="content study-content">
                 {done ? (
                     <div className="study-complete">
                         <div className="complete-icon">{pct >= 80 ? "🏆" : pct >= 50 ? "🎉" : "💪"}</div>
-                        <div className="complete-badge">RESULTAT</div>
-                        <h2>{score} av {total} riktig</h2>
-                        <p>Du fikk <strong>{pct}%</strong> på «{deck.title}».</p>
+                        <div className="complete-badge">{t("result")}</div>
+                        <h2>{t("correctOf", { score, total })}</h2>
+                        <p>{t("quizResultText", { pct })}</p>
                         <div className="study-nav" style={{ marginTop: "8px" }}>
-                            <button onClick={restart} className="btn-primary">🔄 Prøv igjen</button>
-                            <Link to="/" className="btn-ghost">← Tilbake til oversikten</Link>
+                            <button onClick={restart} className="btn-primary">{t("tryAgain")}</button>
+                            <Link to="/" className="btn-ghost">{t("backToOverview")}</Link>
                         </div>
                     </div>
                 ) : (
@@ -84,9 +86,9 @@ export default function Quiz() {
                         <div className="study-hero">
                             <div className="study-hero-text">
                                 <h1>{deck.title}</h1>
-                                <p>Velg riktig svar</p>
+                                <p>{t("quizSub")}</p>
                             </div>
-                            <div className="quiz-score">Poeng: {score}</div>
+                            <div className="quiz-score">{t("score", { n: score })}</div>
                         </div>
 
                         <div className="progress-wrap">
@@ -94,13 +96,13 @@ export default function Quiz() {
                                 <div className="progress-bar-fill" style={{ width: `${progress}%` }} />
                             </div>
                             <div className="progress-meta">
-                                <span>Spørsmål {index + 1} av {total}</span>
+                                <span>{t("questionOf", { i: index + 1, n: total })}</span>
                                 <span>{Math.round(progress)}%</span>
                             </div>
                         </div>
 
                         <div className="quiz-card">
-                            <span className="card-label">Spørsmål</span>
+                            <span className="card-label">{t("question")}</span>
                             <p className="quiz-question">{q.question}</p>
                             <div className="quiz-options">
                                 {(q.options || []).map((option, i) => (
@@ -117,7 +119,7 @@ export default function Quiz() {
                         {selected !== null && (
                             <div className="study-nav">
                                 <button onClick={next} className="btn-primary">
-                                    {index === total - 1 ? "Se resultat ✓" : "Neste →"}
+                                    {index === total - 1 ? t("seeResult") : t("next")}
                                 </button>
                             </div>
                         )}

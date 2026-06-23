@@ -1,9 +1,11 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import api from "../api";
+import { useLang } from "../i18n";
 
 export default function Summary() {
     const { deckId } = useParams();
+    const { t } = useLang();
     const [deck, setDeck] = useState(null);
 
     useEffect(() => {
@@ -28,20 +30,20 @@ export default function Summary() {
                     <div className="topbar-logo-icon">⚡</div>
                     <span className="topbar-logo-name">FlashGenius</span>
                 </Link>
-                <Link to="/" className="btn-ghost">← Tilbake</Link>
+                <Link to="/" className="btn-ghost">{t("back")}</Link>
             </header>
 
             <main className="content">
                 <div className="study-hero">
                     <div className="study-hero-text">
                         <h1>📝 {deck.title}</h1>
-                        <p>AI-generert sammendrag</p>
+                        <p>{t("summaryHeroSub")}</p>
                     </div>
                 </div>
 
                 <div className="summary-layout">
                     <div className="summary-main">
-                        <h2 className="summary-section-title">Sammendrag</h2>
+                        <h2 className="summary-section-title">{t("summarySection")}</h2>
                         {(content.summary || "").split("\n").filter(Boolean).map((para, i) => (
                             <p key={i} className="summary-paragraph">{para}</p>
                         ))}
@@ -49,7 +51,7 @@ export default function Summary() {
 
                     {keyPoints.length > 0 && (
                         <div className="summary-points">
-                            <h2 className="summary-section-title">Nøkkelpunkter</h2>
+                            <h2 className="summary-section-title">{t("keyPoints")}</h2>
                             <ul className="key-points">
                                 {keyPoints.map((point, i) => (
                                     <li key={i}>

@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useLayoutEffect, useCallback } from "react";
 import { useParams, Link } from "react-router-dom";
 import api from "../api";
+import { useLang } from "../i18n";
 
 const COLORS = ["#6366f1", "#f59e0b", "#06b6d4", "#10b981", "#ec4899", "#8b5cf6"];
 
@@ -11,6 +12,7 @@ function curve(x1, y1, x2, y2) {
 
 export default function Mindmap() {
     const { deckId } = useParams();
+    const { t } = useLang();
     const [deck, setDeck] = useState(null);
     const treeRef = useRef(null);
     const [paths, setPaths] = useState([]);
@@ -75,14 +77,14 @@ export default function Mindmap() {
                     <div className="topbar-logo-icon">⚡</div>
                     <span className="topbar-logo-name">FlashGenius</span>
                 </Link>
-                <Link to="/" className="btn-ghost">← Tilbake</Link>
+                <Link to="/" className="btn-ghost">{t("back")}</Link>
             </header>
 
             <main className="content">
                 <div className="study-hero">
                     <div className="study-hero-text">
                         <h1>🧠 {deck.title}</h1>
-                        <p>Visuelt tankekart</p>
+                        <p>{t("mindmapHeroSub")}</p>
                     </div>
                 </div>
 

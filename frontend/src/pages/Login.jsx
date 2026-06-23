@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import api from "../api";
+import { useLang } from "../i18n";
 
 export default function Login() {
+    const { t } = useLang();
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
@@ -18,7 +20,7 @@ export default function Login() {
             localStorage.setItem("token", res.data.token);
             navigate("/");
         } catch {
-            setError("Feil e-post eller passord");
+            setError(t("loginError"));
             setLoading(false);
         }
     }
@@ -28,13 +30,13 @@ export default function Login() {
             <div className="auth-left">
                 <div className="auth-left-content">
                     <span className="auth-left-icon">⚡</span>
-                    <h2>Lær smartere med FlashGenius</h2>
-                    <p>Gjør notater om til studiesett på sekunder og mestre ethvert fag raskere.</p>
+                    <h2>{t("loginLeftTitle")}</h2>
+                    <p>{t("loginLeftSub")}</p>
                 </div>
                 <div className="auth-features">
-                    <div className="auth-feature"><span className="auth-feature-icon">🧠</span> AI genererer spørsmål automatisk</div>
-                    <div className="auth-feature"><span className="auth-feature-icon">⚙️</span> Velg antall kort og vanskelighetsgrad</div>
-                    <div className="auth-feature"><span className="auth-feature-icon">📊</span> Hold oversikt over alle settene dine</div>
+                    <div className="auth-feature"><span className="auth-feature-icon">🧠</span> {t("authFeat1")}</div>
+                    <div className="auth-feature"><span className="auth-feature-icon">⚙️</span> {t("authFeat2")}</div>
+                    <div className="auth-feature"><span className="auth-feature-icon">📊</span> {t("authFeat3")}</div>
                 </div>
             </div>
             <div className="auth-right">
@@ -43,17 +45,17 @@ export default function Login() {
                         <div className="auth-logo-icon">⚡</div>
                         <span className="auth-logo-name">FlashGenius</span>
                     </div>
-                    <h2 className="auth-title">Velkommen tilbake</h2>
-                    <p className="auth-subtitle">Logg inn for å fortsette å lære</p>
+                    <h2 className="auth-title">{t("welcomeBack")}</h2>
+                    <p className="auth-subtitle">{t("loginSubtitle")}</p>
                     <form className="auth-form" onSubmit={handleSubmit}>
-                        <input type="email" placeholder="E-post" value={email} onChange={(e) => setEmail(e.target.value)} required />
-                        <input type="password" placeholder="Passord" value={password} onChange={(e) => setPassword(e.target.value)} required />
+                        <input type="email" placeholder={t("emailPlaceholder")} value={email} onChange={(e) => setEmail(e.target.value)} required />
+                        <input type="password" placeholder={t("passwordPlaceholder")} value={password} onChange={(e) => setPassword(e.target.value)} required />
                         {error && <p className="error">{error}</p>}
                         <button type="submit" className="btn-primary" disabled={loading}>
-                            {loading ? "Logger inn..." : "Logg inn"}
+                            {loading ? t("loggingIn") : t("loginBtn")}
                         </button>
                     </form>
-                    <p className="auth-link">Har ikke konto? <Link to="/register">Registrer deg</Link></p>
+                    <p className="auth-link">{t("noAccount")} <Link to="/register">{t("registerLink")}</Link></p>
                 </div>
             </div>
         </div>
