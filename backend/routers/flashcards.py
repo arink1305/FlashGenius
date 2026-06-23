@@ -76,6 +76,37 @@ def call_groq_json(system, prompt):
         raise HTTPException(status_code=500, detail="Could not parse AI response")
     return parsed
 
+def mm_node(data, fallback="Tankekart"):
+    if isinstance(data, str):
+        return {"title": data, "children": []}
+    if isinstance(data, list):
+        return {"title": fallback, "children": [mm_node(x) for x in data]}
+    if not isinstance(data, dict):
+        return {"title": str(data), "children": []}
+
+    title = data.get("title") or data.get("name") or data.get("label") or data.get("topic")
+    for key in ("children", "branches", "subtopics", "items", "nodes", "points", "subnodes"):
+        if isinstance(data.get(key), list):
+            return {"title": title or fallback, "children": [mm_node(c) for c in data[key]]}
+
+    rest = [(k, v) for k, v in data.items() if k not in ("title", "name", "label", "topic")]
+    if not rest:
+        return {"title": title or fallback, "children": []}
+    if title is None and len(rest) == 1:
+        k, v = rest[0]
+        node = mm_node(v, k)
+        if not node.get("title") or node["title"] == fallback:
+            node["title"] = k
+        return node
+
+    kids = []
+    for k, v in rest:
+        node = mm_node(v, k)
+        if not node.get("title") or node["title"] == fallback:
+            node["title"] = k
+        kids.append(node)
+    return {"title": title or fallback, "children": kids}
+
 def save_content_deck(user_id, title, deck_type, content):
     conn = get_connection()
     cur = conn.cursor()
@@ -206,10 +237,11 @@ Format (a recursive tree — every node has "title" and "children"):
 Rules:
 - The root "title" is the overall topic.
 - Create 4 to 6 main branches.
-- Each main branch has 2 to 4 subtopics.
-- Some subtopics may have 1 to 3 short details (go at most 3 levels deep below the root).
+- EVERY main branch MUST contain 2 to 4 subtopics as its own children — never leave a main branch empty.
+- Most subtopics should have 1 to 3 short details as their children (go at most 3 levels deep below the root).
+- Break the topic down even if the notes are short — infer reasonable subtopics.
 - Keep every label short: 1 to 4 words, not a full sentence.
-- Leaf nodes must have "children": [].
+- Only the deepest detail nodes have "children": [].
 - The root object itself must use the "title" key — do NOT use the topic name as an object key.
 - Write in the same language as the notes.
 
@@ -217,6 +249,7 @@ Build a mind map from these notes:
 {data.notes[:6000]}"""
 
     content = call_groq_json("You return only a valid JSON object. No markdown. No explanation.", prompt)
+    content = mm_node(content, data.title)
     deck_id = save_content_deck(user_id, data.title, "mindmap", content)
     return {"deck_id": deck_id, "type": "mindmap", "content": content}
 
