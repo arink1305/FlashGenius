@@ -57,6 +57,9 @@ html { scroll-behavior: smooth; }
     border-color: var(--border);
 }
 
+[data-theme="dark"] .auth-right { background: var(--bg); }
+[data-theme="dark"] .landing-card-mock { color: var(--text); }
+
 [data-theme="dark"] .btn-ghost {
     background: #1a1830;
     color: var(--muted);
@@ -1535,6 +1538,7 @@ input:focus, textarea:focus {
     padding: 28px;
     cursor: pointer;
     font-family: inherit;
+    color: var(--text);
     box-shadow: var(--shadow-sm);
     transition: transform 200ms cubic-bezier(0.16,1,0.3,1), box-shadow 200ms, border-color 200ms;
     animation: fadeUp 0.5s cubic-bezier(0.16,1,0.3,1) both;
