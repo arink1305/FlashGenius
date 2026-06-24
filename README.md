@@ -98,7 +98,7 @@ Plus everything around it:
 
 <br/>
 
-## 🧠 How it works
+##  How it works
 
 ```
 ┌─────────────┐      ┌──────────────┐      ┌─────────────┐      ┌──────────────┐
@@ -119,7 +119,7 @@ Plus everything around it:
 
 <br/>
 
-## 🛠️ Tech stack
+##  Tech stack
 
 | Layer | Technology |
 |-------|------------|
@@ -131,7 +131,7 @@ Plus everything around it:
 
 <br/>
 
-## 🚀 Running locally
+##  Running locally
 
 The app is **live above** — but you can also clone and run it yourself.
 
