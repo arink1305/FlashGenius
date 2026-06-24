@@ -40,18 +40,18 @@ Paste any text and let AI build **flashcards, quizzes, summaries, or mind maps**
 
 Plus everything around it:
 
-- 🤖 **Powered by Llama 3.1** via the Groq API, with robust JSON parsing (retry + salvage) so generations don't fail
-- 🔐 **Accounts & authentication** — JWT-based auth with bcrypt-hashed passwords
-- 📚 **Personal library** — every set is saved to your account, tagged by type, on a clean dashboard
-- 🌗 **Light & dark mode** — switch themes instantly, preference is remembered
-- 🌍 **Bilingual UI** — toggle between Norwegian and English
-- 📤 **Export your data** — download all your sets as JSON
-- ⚙️ **Account management** — change password, export data, or delete your account
-- 🏠 **Public landing page** — browse the app before signing up; an account is only required to generate content
+-  **Powered by Llama 3.1** via the Groq API, with robust JSON parsing (retry + salvage) so generations don't fail
+-  **Accounts & authentication** — JWT-based auth with bcrypt-hashed passwords
+-  **Personal library** — every set is saved to your account, tagged by type, on a clean dashboard
+-  **Light & dark mode** — switch themes instantly, preference is remembered
+-  **Bilingual UI** — toggle between Norwegian and English
+-  **Export your data** — download all your sets as JSON
+-  **Account management** — change password, export data, or delete your account
+-  **Public landing page** — browse the app before signing up; an account is only required to generate content
 
 <br/>
 
-## 📸 Screenshots
+##  Screenshots
 
 <table>
   <tr>
