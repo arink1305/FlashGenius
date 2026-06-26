@@ -14,6 +14,8 @@ Paste any text and let AI build **flashcards, quizzes, summaries, or mind maps**
 
 <br/>
 
+[![CI](https://github.com/arink1305/FlashGenius/actions/workflows/ci.yml/badge.svg)](https://github.com/arink1305/FlashGenius/actions/workflows/ci.yml)
+
 ![Live Demo](https://img.shields.io/badge/Live_Demo-flash--genius.vercel.app-000000?style=for-the-badge&logo=vercel&logoColor=white)
 ![React](https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react&logoColor=black)
 ![Vite](https://img.shields.io/badge/Vite-8-646CFF?style=for-the-badge&logo=vite&logoColor=white)
@@ -196,6 +198,25 @@ npm run dev
 The app runs on **http://localhost:5173**.
 
 </details>
+
+<br/>
+
+## 🧪 Tests, CI & Docker
+
+**Tests** — backend logic (auth hashing, JWT, AI-response parsing & mind-map normalization) and frontend utilities/hooks are covered by unit tests:
+
+```bash
+cd backend && pytest          # backend (pytest)
+cd frontend && npm test       # frontend (Vitest)
+```
+
+**CI** — every push and pull request runs the full test suite and a production build via [GitHub Actions](.github/workflows/ci.yml).
+
+**Docker** — run the whole stack (frontend + backend + PostgreSQL) with one command:
+
+```bash
+GROQ_API_KEY=your_key docker compose up --build
+```
 
 <br/>
 
