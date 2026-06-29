@@ -24,6 +24,24 @@ def get_user_id(token: str) -> int:
     except JWTError:
         raise HTTPException(status_code=401, detail="Invalid token")
 
+FREE_DECK_LIMIT = 5
+
+def check_quota(user_id):
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute("SELECT is_pro FROM users WHERE id = %s", (user_id,))
+    row = cur.fetchone()
+    if row and row[0]:
+        cur.close()
+        conn.close()
+        return
+    cur.execute("SELECT count(*) FROM decks WHERE user_id = %s", (user_id,))
+    count = cur.fetchone()[0]
+    cur.close()
+    conn.close()
+    if count >= FREE_DECK_LIMIT:
+        raise HTTPException(status_code=402, detail="free_limit_reached")
+
 def try_parse_json(text):
     if text.startswith("```"):
         text = text.split("\n", 1)[1].rsplit("```", 1)[0].strip()
@@ -150,6 +168,7 @@ DIFFICULTY_INSTRUCTIONS = {
 def generate(data: NotesIn, authorization: str = Header(...)):
     token = authorization.replace("Bearer ", "")
     user_id = get_user_id(token)
+    check_quota(user_id)
     count = max(1, min(data.count, 30))
     diff_instruction = DIFFICULTY_INSTRUCTIONS.get(data.difficulty, DIFFICULTY_INSTRUCTIONS["medium"])
 
@@ -185,6 +204,7 @@ Generate exactly {count} flashcards from these notes:
 def generate_quiz(data: QuizIn, authorization: str = Header(...)):
     token = authorization.replace("Bearer ", "")
     user_id = get_user_id(token)
+    check_quota(user_id)
     count = max(1, min(data.count, 20))
 
     prompt = f"""You are a quiz generator. Return ONLY a JSON object, no markdown, no explanation.
@@ -209,6 +229,7 @@ Generate exactly {count} quiz questions from these notes:
 def generate_summary(data: SummaryIn, authorization: str = Header(...)):
     token = authorization.replace("Bearer ", "")
     user_id = get_user_id(token)
+    check_quota(user_id)
 
     prompt = f"""You are a study summarizer. Return ONLY a JSON object, no markdown, no explanation.
 
@@ -228,6 +249,7 @@ Summarize these notes:
 def generate_mindmap(data: MindmapIn, authorization: str = Header(...)):
     token = authorization.replace("Bearer ", "")
     user_id = get_user_id(token)
+    check_quota(user_id)
 
     prompt = f"""You are a mind map generator. Return ONLY a JSON object, no markdown, no explanation.
 

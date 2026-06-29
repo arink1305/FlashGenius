@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from routers import auth, flashcards
+from routers import auth, flashcards, billing
 
 app = FastAPI()
 
@@ -18,3 +18,4 @@ def root():
 
 app.include_router(auth.router, prefix="/auth")
 app.include_router(flashcards.router, prefix="/flashcards")
+app.include_router(billing.router, prefix="/billing")

@@ -1,5 +1,9 @@
 FROM python:3.12-slim
 
+ENV PYTHONUTF8=1 \
+    PYTHONUNBUFFERED=1 \
+    LANG=C.UTF-8
+
 WORKDIR /app
 
 COPY requirements.txt .

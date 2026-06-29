@@ -29,6 +29,7 @@ export default function Generate() {
     const [error, setError] = useState("");
     const [fileLoading, setFileLoading] = useState(false);
     const [fileError, setFileError] = useState("");
+    const [limitReached, setLimitReached] = useState(false);
 
     if (!DECK_TYPES[type]) return <Navigate to="/new" />;
     const meta = DECK_TYPES[type];
@@ -62,6 +63,7 @@ export default function Generate() {
         e.preventDefault();
         if (tooLong) return;
         setError("");
+        setLimitReached(false);
         setLoading(true);
         const payload = { title, notes };
         if (type === "flashcards") { payload.count = count; payload.difficulty = difficulty; }
@@ -69,8 +71,12 @@ export default function Generate() {
         try {
             const res = await api.post(endpoints[type], payload);
             navigate(deckRoute(type, res.data.deck_id));
-        } catch {
-            setError(t("genError"));
+        } catch (err) {
+            if (err.response?.status === 402) {
+                setLimitReached(true);
+            } else {
+                setError(t("genError"));
+            }
             setLoading(false);
         }
     }
@@ -141,6 +147,12 @@ export default function Generate() {
                         {fileError && <p className="error">{fileError}</p>}
                         {tooLong && <p className="error">{t("tooLong", { max: MAX_CHARS })}</p>}
                         {error && <p className="error">{error}</p>}
+                        {limitReached && (
+                            <div className="limit-banner">
+                                <p>{t("limitReached")}</p>
+                                <Link to="/settings" className="btn-primary">{t("upgradeLink")}</Link>
+                            </div>
+                        )}
 
                         <button type="submit" className="btn-primary generate-submit" disabled={loading || fileLoading || tooLong}>
                             {loading ? (

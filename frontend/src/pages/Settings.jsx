@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import Logo from "../components/Logo";
 import api from "../api";
 import { useLang } from "../i18n";
@@ -17,15 +17,47 @@ export default function Settings() {
     const navigate = useNavigate();
     const email = getEmail();
     const { t, lang, setLang } = useLang();
+    const [searchParams, setSearchParams] = useSearchParams();
 
     const [theme, setTheme] = useState(() => localStorage.getItem("theme") || "light");
     const [deleteConfirm, setDeleteConfirm] = useState("");
     const [showDelete, setShowDelete] = useState(false);
+    const [isPro, setIsPro] = useState(false);
+    const [upgrading, setUpgrading] = useState(false);
+    const [upgradeMsg, setUpgradeMsg] = useState("");
 
     useEffect(() => {
         localStorage.setItem("theme", theme);
         document.documentElement.setAttribute("data-theme", theme);
     }, [theme]);
+
+    useEffect(() => {
+        api.get("/auth/me").then((res) => setIsPro(res.data.is_pro)).catch(() => {});
+    }, []);
+
+    useEffect(() => {
+        const sessionId = searchParams.get("session_id");
+        if (searchParams.get("upgrade") === "success" && sessionId) {
+            api.post("/billing/confirm", { session_id: sessionId }).then((res) => {
+                if (res.data.is_pro) {
+                    setIsPro(true);
+                    setUpgradeMsg(t("upgradeSuccess"));
+                }
+                setSearchParams({}, { replace: true });
+            }).catch(() => setSearchParams({}, { replace: true }));
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
+    async function handleUpgrade() {
+        setUpgrading(true);
+        try {
+            const res = await api.post("/billing/checkout");
+            window.location.href = res.data.url;
+        } catch {
+            setUpgrading(false);
+        }
+    }
 
     async function handleDeleteAccount() {
         if (deleteConfirm !== t("deleteWord")) return;
@@ -74,10 +106,38 @@ export default function Settings() {
                         <div className="settings-row">
                             <div className="settings-row-label">
                                 <span>{t("plan")}</span>
-                                <p>{t("free")}</p>
+                                <p>{isPro ? t("planPro") : t("planFree")}</p>
                             </div>
                         </div>
                     </div>
+
+                    {isPro ? (
+                        <div className="settings-card pro-card">
+                            <p className="settings-section-title">{t("proActiveTitle")}</p>
+                            <div className="settings-row">
+                                <div className="settings-row-label">
+                                    <p>{t("proActiveDesc")}</p>
+                                </div>
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="settings-card pro-card">
+                            <p className="settings-section-title">✨ {t("upgradeTitle")}</p>
+                            <div className="settings-row">
+                                <div className="settings-row-label">
+                                    <p>{t("upgradeDesc")}</p>
+                                    {upgradeMsg && <p className="settings-success">{upgradeMsg}</p>}
+                                </div>
+                                <button className="btn-primary" onClick={handleUpgrade} disabled={upgrading}>
+                                    {upgrading ? t("upgrading") : t("upgradeBtn")}
+                                </button>
+                            </div>
+                        </div>
+                    )}
+
+                    {upgradeMsg && isPro && (
+                        <p className="settings-success" style={{ marginTop: "-8px" }}>{upgradeMsg}</p>
+                    )}
 
                     <div className="settings-card">
                         <p className="settings-section-title">{t("changePassword")}</p>

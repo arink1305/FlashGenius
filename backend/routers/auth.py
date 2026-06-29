@@ -64,6 +64,19 @@ def login(user: UserIn):
     token = jwt.encode({"sub": str(row[0]), "email": user.email}, SECRET_KEY, algorithm="HS256")
     return {"token": token}
 
+@router.get("/me")
+def me(authorization: str = Header(...)):
+    user_id = get_user_id(authorization)
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute("SELECT email, is_pro FROM users WHERE id = %s", (user_id,))
+    row = cur.fetchone()
+    cur.close()
+    conn.close()
+    if not row:
+        raise HTTPException(status_code=404, detail="User not found")
+    return {"email": row[0], "is_pro": bool(row[1])}
+
 @router.put("/password")
 def change_password(data: PasswordChange, authorization: str = Header(...)):
     user_id = get_user_id(authorization)
