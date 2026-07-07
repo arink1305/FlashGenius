@@ -1,12 +1,18 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
-import Logo from "../components/Logo";
+import { motion, AnimatePresence } from "framer-motion";
+import { PartyPopper, RefreshCw, ArrowLeft, ArrowRight, Check, MousePointerClick, Brain } from "lucide-react";
+import Topbar from "../components/Topbar";
+import ShareButton from "../components/ShareButton";
+import { ViewerSkeleton } from "../components/Skeleton";
 import api from "../api";
 import { useLang } from "../i18n";
+import { useMe, hasTier } from "../useMe";
 
 export default function Study() {
     const { deckId } = useParams();
     const { t } = useLang();
+    const me = useMe();
     const [deck, setDeck] = useState(null);
     const [index, setIndex] = useState(0);
     const [flipped, setFlipped] = useState(false);
@@ -19,9 +25,10 @@ export default function Study() {
     if (!deck) {
         return (
             <div className="page">
-                <div className="content study-content">
-                    <div style={{ fontSize: "2rem", marginTop: "80px" }}>⏳</div>
-                </div>
+                <Topbar>
+                    <Link to="/" className="btn-ghost">{t("back")}</Link>
+                </Topbar>
+                <main className="content"><ViewerSkeleton /></main>
             </div>
         );
     }
@@ -49,26 +56,23 @@ export default function Study() {
 
     return (
         <div className="page">
-            <header className="topbar">
-                <Link to="/" className="topbar-logo">
-                    <Logo className="topbar-logo-icon" />
-                    <span className="topbar-logo-name">FlashGenius</span>
-                </Link>
+            <Topbar>
+                <ShareButton deckId={deckId} />
                 <Link to="/" className="btn-ghost">{t("back")}</Link>
-            </header>
+            </Topbar>
 
             <main className="content study-content">
                 {done ? (
-                    <div className="study-complete">
-                        <div className="complete-icon">🎉</div>
+                    <motion.div className="study-complete" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}>
+                        <div className="complete-icon-wrap"><PartyPopper size={52} /></div>
                         <div className="complete-badge">{t("completed")}</div>
                         <h2>{t("wellDone")}</h2>
                         <p>{t("studyDoneText", { n: total })}</p>
                         <div className="study-nav" style={{ marginTop: "8px" }}>
-                            <button onClick={restart} className="btn-primary">{t("againRound")}</button>
-                            <Link to="/" className="btn-ghost">{t("backToOverview")}</Link>
+                            <button onClick={restart} className="btn-primary"><RefreshCw size={15} /> {t("againRound")}</button>
+                            <Link to="/" className="btn-ghost"><ArrowLeft size={15} /> {t("backToOverview")}</Link>
                         </div>
-                    </div>
+                    </motion.div>
                 ) : (
                     <>
                         <div className="study-hero">
@@ -76,7 +80,14 @@ export default function Study() {
                                 <h1>{deck.title}</h1>
                                 <p>{t("studySub")}</p>
                             </div>
-                            <Link to="/" className="btn-white-outline">{t("exit")}</Link>
+                            <div style={{ display: "flex", gap: 8, position: "relative", zIndex: 1 }}>
+                                {hasTier(me, "pro") && (
+                                    <Link to={`/smart/${deckId}`} className="btn-white-outline">
+                                        <Brain size={15} /> {t("smartMode")}
+                                    </Link>
+                                )}
+                                <Link to="/" className="btn-white-outline">{t("exit")}</Link>
+                            </div>
                         </div>
 
                         <div className="progress-wrap">
@@ -89,25 +100,36 @@ export default function Study() {
                             </div>
                         </div>
 
-                        <div className={`flashcard ${flipped ? "flipped" : ""}`} onClick={() => setFlipped(!flipped)}>
-                            <div className="flashcard-inner">
-                                <div className="flashcard-front">
-                                    <span className="card-label">{t("question")}</span>
-                                    <p>{card.question}</p>
+                        <AnimatePresence mode="wait">
+                            <motion.div
+                                key={index}
+                                initial={{ opacity: 0, x: 24 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                exit={{ opacity: 0, x: -24 }}
+                                transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+                                style={{ width: "100%", display: "flex", justifyContent: "center" }}
+                            >
+                                <div className={`flashcard ${flipped ? "flipped" : ""}`} onClick={() => setFlipped(!flipped)}>
+                                    <div className="flashcard-inner">
+                                        <div className="flashcard-front">
+                                            <span className="card-label">{t("question")}</span>
+                                            <p>{card.question}</p>
+                                        </div>
+                                        <div className="flashcard-back">
+                                            <span className="card-label">{t("answer")}</span>
+                                            <p>{card.answer}</p>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div className="flashcard-back">
-                                    <span className="card-label">{t("answer")}</span>
-                                    <p>{card.answer}</p>
-                                </div>
-                            </div>
-                        </div>
+                            </motion.div>
+                        </AnimatePresence>
 
-                        <p className="flip-hint">{t("flipHint")}</p>
+                        <p className="flip-hint"><MousePointerClick size={14} /> {t("flipHint")}</p>
 
                         <div className="study-nav">
-                            <button onClick={prev} disabled={index === 0} className="btn-ghost">{t("prev")}</button>
+                            <button onClick={prev} disabled={index === 0} className="btn-ghost"><ArrowLeft size={15} /> {t("prev")}</button>
                             <button onClick={next} className="btn-primary">
-                                {index === total - 1 ? t("finish") : t("next")}
+                                {index === total - 1 ? <>{t("finish")} <Check size={15} /></> : <>{t("next")} <ArrowRight size={15} /></>}
                             </button>
                         </div>
                     </>

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import { Lock, Check, Shield, RefreshCw } from "lucide-react";
 import Logo from "../components/Logo";
 import api from "../api";
 import { useLang } from "../i18n";
@@ -29,14 +30,14 @@ export default function ChangePassword() {
         <div className="auth-container">
             <div className="auth-left">
                 <div className="auth-left-content">
-                    <span className="auth-left-icon">🔒</span>
+                    <span className="auth-left-icon"><Lock size={46} /></span>
                     <h2>{t("cpLeftTitle")}</h2>
                     <p>{t("cpLeftSub")}</p>
                 </div>
                 <div className="auth-features">
-                    <div className="auth-feature"><span className="auth-feature-icon">✅</span> {t("cpFeat1")}</div>
-                    <div className="auth-feature"><span className="auth-feature-icon">🔐</span> {t("cpFeat2")}</div>
-                    <div className="auth-feature"><span className="auth-feature-icon">↩️</span> {t("cpFeat3")}</div>
+                    <div className="auth-feature"><span className="auth-feature-icon"><Check size={17} /></span> {t("cpFeat1")}</div>
+                    <div className="auth-feature"><span className="auth-feature-icon"><Shield size={17} /></span> {t("cpFeat2")}</div>
+                    <div className="auth-feature"><span className="auth-feature-icon"><RefreshCw size={17} /></span> {t("cpFeat3")}</div>
                 </div>
             </div>
             <div className="auth-right">

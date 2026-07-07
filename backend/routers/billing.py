@@ -11,8 +11,18 @@ load_dotenv()
 router = APIRouter()
 
 FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:5173")
-PRO_AMOUNT = 4900
-PRO_CURRENCY = "nok"
+CURRENCY = "nok"
+
+PLANS = {
+    "plus": {"amount": 4900, "name": "FlashGenius Plus", "description": "Ubegrenset sett, tankekart, PDF-opplasting og eksport"},
+    "pro": {"amount": 9900, "name": "FlashGenius Pro", "description": "Alt i Plus + smart repetisjon, statistikk og kraftigere AI"},
+    "ultra": {"amount": 14900, "name": "FlashGenius Ultra", "description": "Alt i Pro + delbare sett og API-tilgang"},
+}
+
+TIER_ORDER = {"free": 0, "plus": 1, "pro": 2, "ultra": 3}
+
+class CheckoutIn(BaseModel):
+    tier: str = "plus"
 
 class ConfirmIn(BaseModel):
     session_id: str
@@ -24,23 +34,40 @@ def get_stripe():
     stripe.api_key = key
     return stripe
 
+def get_current_tier(user_id):
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute("SELECT tier FROM users WHERE id = %s", (user_id,))
+    row = cur.fetchone()
+    cur.close()
+    conn.close()
+    return (row[0] or "free") if row else "free"
+
 @router.post("/checkout")
-def create_checkout(authorization: str = Header(...)):
+def create_checkout(data: CheckoutIn, authorization: str = Header(...)):
     user_id = get_user_id(authorization)
+    plan = PLANS.get(data.tier)
+    if not plan:
+        raise HTTPException(status_code=400, detail="Unknown tier")
+    current = get_current_tier(user_id)
+    if TIER_ORDER.get(current, 0) >= TIER_ORDER[data.tier]:
+        raise HTTPException(status_code=400, detail="already_on_tier")
+    credit = PLANS[current]["amount"] if current in PLANS else 0
+    amount = plan["amount"] - credit
     client = get_stripe()
     session = client.checkout.Session.create(
         mode="payment",
         line_items=[{
             "price_data": {
-                "currency": PRO_CURRENCY,
-                "product_data": {"name": "FlashGenius Pro", "description": "Ubegrenset antall sett"},
-                "unit_amount": PRO_AMOUNT,
+                "currency": CURRENCY,
+                "product_data": {"name": plan["name"], "description": plan["description"]},
+                "unit_amount": amount,
             },
             "quantity": 1,
         }],
         success_url=f"{FRONTEND_URL}/settings?upgrade=success&session_id={{CHECKOUT_SESSION_ID}}",
-        cancel_url=f"{FRONTEND_URL}/settings?upgrade=cancelled",
-        metadata={"user_id": str(user_id)},
+        cancel_url=f"{FRONTEND_URL}/pricing?upgrade=cancelled",
+        metadata={"user_id": str(user_id), "tier": data.tier},
     )
     return {"url": session.url}
 
@@ -48,15 +75,29 @@ def create_checkout(authorization: str = Header(...)):
 def confirm(data: ConfirmIn, authorization: str = Header(...)):
     user_id = get_user_id(authorization)
     client = get_stripe()
-    session = client.checkout.Session.retrieve(data.session_id)
-    paid = session.get("payment_status") == "paid"
-    owner = str(session.get("metadata", {}).get("user_id")) == str(user_id)
-    if paid and owner:
-        conn = get_connection()
-        cur = conn.cursor()
-        cur.execute("UPDATE users SET is_pro = TRUE WHERE id = %s", (user_id,))
+    try:
+        session = client.checkout.Session.retrieve(data.session_id)
+    except Exception:
+        raise HTTPException(status_code=400, detail="Invalid session")
+    paid = session.payment_status == "paid"
+    meta = session.metadata.to_dict() if session.metadata else {}
+    owner = str(meta.get("user_id")) == str(user_id)
+    tier = meta.get("tier", "plus")
+    if tier not in PLANS:
+        tier = "plus"
+    print(f"BILLING CONFIRM user={user_id} paid={paid} owner={owner} tier={tier}")
+    if not (paid and owner):
+        return {"tier": None, "confirmed": False}
+
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute("SELECT tier FROM users WHERE id = %s", (user_id,))
+    row = cur.fetchone()
+    current = (row[0] or "free") if row else "free"
+    if TIER_ORDER.get(tier, 0) > TIER_ORDER.get(current, 0):
+        cur.execute("UPDATE users SET tier = %s, is_pro = TRUE WHERE id = %s", (tier, user_id))
         conn.commit()
-        cur.close()
-        conn.close()
-        return {"is_pro": True}
-    return {"is_pro": False}
+        current = tier
+    cur.close()
+    conn.close()
+    return {"tier": current, "confirmed": True}

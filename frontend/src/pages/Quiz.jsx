@@ -1,6 +1,10 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
-import Logo from "../components/Logo";
+import { motion, AnimatePresence } from "framer-motion";
+import { Trophy, PartyPopper, Dumbbell, RefreshCw, ArrowLeft, Check, X, ArrowRight } from "lucide-react";
+import Topbar from "../components/Topbar";
+import ShareButton from "../components/ShareButton";
+import { ViewerSkeleton } from "../components/Skeleton";
 import api from "../api";
 import { useLang } from "../i18n";
 
@@ -20,9 +24,10 @@ export default function Quiz() {
     if (!deck) {
         return (
             <div className="page">
-                <div className="content study-content">
-                    <div style={{ fontSize: "2rem", marginTop: "80px" }}>⏳</div>
-                </div>
+                <Topbar>
+                    <Link to="/" className="btn-ghost">{t("back")}</Link>
+                </Topbar>
+                <main className="content"><ViewerSkeleton /></main>
             </div>
         );
     }
@@ -59,29 +64,27 @@ export default function Quiz() {
     }
 
     const pct = total ? Math.round((score / total) * 100) : 0;
+    const ResultIcon = pct >= 80 ? Trophy : pct >= 50 ? PartyPopper : Dumbbell;
 
     return (
         <div className="page">
-            <header className="topbar">
-                <Link to="/" className="topbar-logo">
-                    <Logo className="topbar-logo-icon" />
-                    <span className="topbar-logo-name">FlashGenius</span>
-                </Link>
+            <Topbar>
+                <ShareButton deckId={deckId} />
                 <Link to="/" className="btn-ghost">{t("back")}</Link>
-            </header>
+            </Topbar>
 
             <main className="content study-content">
                 {done ? (
-                    <div className="study-complete">
-                        <div className="complete-icon">{pct >= 80 ? "🏆" : pct >= 50 ? "🎉" : "💪"}</div>
+                    <motion.div className="study-complete" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}>
+                        <div className="complete-icon-wrap"><ResultIcon size={52} /></div>
                         <div className="complete-badge">{t("result")}</div>
                         <h2>{t("correctOf", { score, total })}</h2>
                         <p>{t("quizResultText", { pct })}</p>
                         <div className="study-nav" style={{ marginTop: "8px" }}>
-                            <button onClick={restart} className="btn-primary">{t("tryAgain")}</button>
-                            <Link to="/" className="btn-ghost">{t("backToOverview")}</Link>
+                            <button onClick={restart} className="btn-primary"><RefreshCw size={15} /> {t("tryAgain")}</button>
+                            <Link to="/" className="btn-ghost"><ArrowLeft size={15} /> {t("backToOverview")}</Link>
                         </div>
-                    </div>
+                    </motion.div>
                 ) : (
                     <>
                         <div className="study-hero">
@@ -102,27 +105,36 @@ export default function Quiz() {
                             </div>
                         </div>
 
-                        <div className="quiz-card">
-                            <span className="card-label">{t("question")}</span>
-                            <p className="quiz-question">{q.question}</p>
-                            <div className="quiz-options">
-                                {(q.options || []).map((option, i) => (
-                                    <button key={i} className={optionClass(option)} onClick={() => choose(option)}>
-                                        <span className="quiz-option-letter">{String.fromCharCode(65 + i)}</span>
-                                        <span>{option}</span>
-                                        {selected !== null && option === q.answer && <span className="quiz-mark">✓</span>}
-                                        {selected === option && option !== q.answer && <span className="quiz-mark">✕</span>}
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
+                        <AnimatePresence mode="wait">
+                            <motion.div
+                                key={index}
+                                className="quiz-card"
+                                initial={{ opacity: 0, x: 24 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                exit={{ opacity: 0, x: -24 }}
+                                transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+                            >
+                                <span className="card-label">{t("question")}</span>
+                                <p className="quiz-question">{q.question}</p>
+                                <div className="quiz-options">
+                                    {(q.options || []).map((option, i) => (
+                                        <button key={i} className={optionClass(option)} onClick={() => choose(option)}>
+                                            <span className="quiz-option-letter">{String.fromCharCode(65 + i)}</span>
+                                            <span>{option}</span>
+                                            {selected !== null && option === q.answer && <span className="quiz-mark"><Check size={17} /></span>}
+                                            {selected === option && option !== q.answer && <span className="quiz-mark"><X size={17} /></span>}
+                                        </button>
+                                    ))}
+                                </div>
+                            </motion.div>
+                        </AnimatePresence>
 
                         {selected !== null && (
-                            <div className="study-nav">
+                            <motion.div className="study-nav" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}>
                                 <button onClick={next} className="btn-primary">
-                                    {index === total - 1 ? t("seeResult") : t("next")}
+                                    {index === total - 1 ? <>{t("seeResult")} <Check size={15} /></> : <>{t("next")} <ArrowRight size={15} /></>}
                                 </button>
-                            </div>
+                            </motion.div>
                         )}
                     </>
                 )}

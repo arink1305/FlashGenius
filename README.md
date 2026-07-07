@@ -12,6 +12,8 @@ Paste any text and let AI build **flashcards, quizzes, summaries, or mind maps**
 
 <sub>Hosted on Vercel (frontend + serverless backend) with a Neon PostgreSQL database. The backend may take a few seconds to wake up on the first request.</sub>
 
+<sub>💳 **Try the paid plans for free:** payments run in Stripe test mode — use card number `4242 4242 4242 4242`, any future expiry date, and any CVC to unlock Plus/Pro/Ultra without spending a krone.</sub>
+
 <br/>
 
 [![CI](https://github.com/arink1305/FlashGenius/actions/workflows/ci.yml/badge.svg)](https://github.com/arink1305/FlashGenius/actions/workflows/ci.yml)
@@ -21,7 +23,8 @@ Paste any text and let AI build **flashcards, quizzes, summaries, or mind maps**
 ![Vite](https://img.shields.io/badge/Vite-8-646CFF?style=for-the-badge&logo=vite&logoColor=white)
 ![FastAPI](https://img.shields.io/badge/FastAPI-0.138-009688?style=for-the-badge&logo=fastapi&logoColor=white)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-336791?style=for-the-badge&logo=postgresql&logoColor=white)
-![Groq](https://img.shields.io/badge/Groq_AI-Llama_3.1-F55036?style=for-the-badge&logo=meta&logoColor=white)
+![Groq](https://img.shields.io/badge/Groq_AI-Llama_3.x-F55036?style=for-the-badge&logo=meta&logoColor=white)
+![Stripe](https://img.shields.io/badge/Stripe-Payments-635BFF?style=for-the-badge&logo=stripe&logoColor=white)
 
 <br/>
 
@@ -38,18 +41,33 @@ Paste any text and let AI build **flashcards, quizzes, summaries, or mind maps**
 - 🃏 **Flashcards** — Q&A cards with configurable count (5–20) and difficulty (easy / medium / hard), studied with a card-flip interface
 - ❓ **Quizzes** — multiple-choice (4 options) or yes/no questions, answered interactively with instant feedback and a score
 - 📝 **Summaries** — a structured summary plus a list of key points
-- 🧠 **Mind maps** — notes turned into a visual map with a central topic and colored branches
+- 🧠 **Mind maps** — an interactive, zoomable tree with collapsible branches, branch highlighting, and click-to-expand nodes
+
+**Monetization** — a real freemium model backed by Stripe Checkout:
+
+| Plan | Price | Unlocks |
+|------|-------|---------|
+| **Free** | 0 kr | 5 sets, flashcards / quizzes / summaries |
+| **Plus** | 49 kr | Unlimited sets, mind maps, PDF upload, export, folders |
+| **Pro** | 99 kr | Smart review (SM-2 spaced repetition), statistics & streaks, stronger AI model |
+| **Ultra** | 149 kr | Shareable set links, API access, priority generation |
+
+One-time payments with upgrade credit — existing customers only pay the difference (verified server-side). Quotas and feature gates are enforced in the backend, not just hidden in the UI.
 
 Plus everything around it:
 
--  **Powered by Llama 3.1** via the Groq API, with robust JSON parsing (retry + salvage) so generations don't fail
--  **Accounts & authentication** — JWT-based auth with bcrypt-hashed passwords
--  **Personal library** — every set is saved to your account, tagged by type, on a clean dashboard
+-  **Powered by Llama 3.x** via the Groq API, with robust JSON parsing (retry + salvage) so generations don't fail — Pro/Ultra requests use the larger 70B model
+-  **Smart review** — an SM-2 spaced-repetition engine schedules each card exactly when you're about to forget it
+-  **Statistics** — day streaks, a weekly review chart, and per-deck mastery tracking
+-  **Folders** — organize your sets into color-coded animated folders
+-  **File upload** — extract notes straight from PDF, TXT, or MD files in the browser
+-  **Set sharing** — Ultra users can publish read-only links to any set
+-  **Accounts & authentication** — JWT-based auth with bcrypt-hashed passwords, plus API-key auth for Ultra
 -  **Light & dark mode** — switch themes instantly, preference is remembered
 -  **Bilingual UI** — toggle between Norwegian and English
--  **Export your data** — download all your sets as JSON
+-  **Polished motion design** — page transitions, staggered cards, skeleton loaders, and drifting background blobs (framer-motion + CSS)
 -  **Account management** — change password, export data, or delete your account
--  **Public landing page** — browse the app before signing up; an account is only required to generate content
+-  **Public landing page** — browse the app and pricing before signing up
 
 <br/>
 
@@ -125,11 +143,12 @@ Plus everything around it:
 
 | Layer | Technology |
 |-------|------------|
-| **Frontend** | React 19, Vite, React Router, Axios, plain CSS (custom properties, glass morphism, animations) |
+| **Frontend** | React 19, Vite, React Router, Axios, framer-motion, lucide-react, plain CSS (custom properties, glass morphism, animations) |
 | **Backend** | FastAPI, Uvicorn |
 | **Database** | PostgreSQL (via `psycopg2`) |
-| **Auth** | JWT (`python-jose`), password hashing with `bcrypt` |
-| **AI** | Groq API — `llama-3.1-8b-instant` |
+| **Auth** | JWT (`python-jose`), password hashing with `bcrypt`, API keys for Ultra |
+| **Payments** | Stripe Checkout (one-time payments, tier metadata, server-side verification) |
+| **AI** | Groq API — `llama-3.1-8b-instant` (Free/Plus) and `llama-3.3-70b-versatile` (Pro/Ultra) |
 
 <br/>
 
@@ -229,22 +248,27 @@ FlashGenius/
 │   ├── database.py          # DB connection & table setup
 │   ├── requirements.txt
 │   └── routers/
-│       ├── auth.py          # register, login, change password, delete account
-│       └── flashcards.py    # generate, list, fetch, export, delete decks
+│       ├── auth.py          # register, login, /me, API keys, account
+│       ├── billing.py       # Stripe checkout + payment confirmation
+│       └── flashcards.py    # generation, decks, folders, reviews, stats, sharing
 │
 └── frontend/
     └── src/
         ├── api.js           # Axios instance with JWT interceptor
-        ├── App.jsx          # Routes + auth guards
+        ├── useMe.js         # cached account/tier hook + tier gating helpers
+        ├── App.jsx          # Routes + auth guards + page transitions
+        ├── components/      # Topbar, Footer, Folder, ShareButton, skeletons
         └── pages/
             ├── Landing.jsx        # public marketing page
-            ├── Login.jsx
-            ├── Register.jsx
-            ├── Dashboard.jsx      # your saved sets + profile menu
-            ├── Generate.jsx       # notes input + count/difficulty
+            ├── Pricing.jsx        # plan comparison + Stripe checkout
+            ├── Dashboard.jsx      # sets, folders, stats strip
+            ├── Generate.jsx       # notes input + count/difficulty + file upload
             ├── Study.jsx          # card-flip study mode
-            ├── Settings.jsx       # theme, language, data, account
-            └── ChangePassword.jsx
+            ├── SmartStudy.jsx     # SM-2 spaced repetition
+            ├── Stats.jsx          # streaks, weekly chart, mastery
+            ├── Mindmap.jsx        # interactive zoomable mind map
+            ├── SharedDeck.jsx     # public read-only shared sets
+            └── Settings.jsx       # plan, theme, language, data, account
 ```
 
 <br/>
@@ -253,11 +277,13 @@ FlashGenius/
 
 This is a full-stack project I built end to end:
 
-- Designed and built the **entire frontend** in React — a public landing page, auth flow, dashboard, an AI generation page with live settings, an animated card-flip study mode, and a settings page with theme switching, language toggle, data export, and account management.
-- Built the **REST API** in FastAPI from scratch, including JWT authentication, bcrypt password hashing, and full CRUD for flashcard decks.
-- Designed a **relational schema** in PostgreSQL (users → decks → flashcards) and wrote the queries by hand.
-- Integrated a **large language model** (Llama 3.1 through Groq) and engineered the prompt so the model returns strict, parseable JSON every time.
-- Did all the **UI/UX and styling** myself in plain CSS — the light/dark themes, gradients, glass morphism, and animations.
+- Designed and built the **entire frontend** in React — a public landing page, auth flow, dashboard with animated folders, an AI generation page with live settings, card-flip study and SM-2 review modes, a statistics page, an interactive mind map with zoom/pan, and a pricing page.
+- Built the **REST API** in FastAPI from scratch, including JWT authentication, bcrypt password hashing, tier-based feature gating, and full CRUD for decks, folders, and reviews.
+- Integrated **Stripe Checkout** end to end — one-time payments per tier, upgrade pricing where existing customers pay only the difference, and server-side payment verification before any account is upgraded.
+- Designed a **relational schema** in PostgreSQL (users → folders → decks → flashcards → card progress + review log) and wrote the queries by hand.
+- Implemented the **SM-2 spaced-repetition algorithm** on the backend to schedule card reviews, feeding the streak and mastery statistics.
+- Integrated a **large language model** (Llama 3.x through Groq) and engineered the prompt so the model returns strict, parseable JSON every time.
+- Did all the **UI/UX and styling** myself in plain CSS + framer-motion — the light/dark themes, gradients, glass morphism, page transitions, and micro-animations.
 
 ## 🎓 What I learned
 

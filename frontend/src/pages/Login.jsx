@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import { Zap, Brain, SlidersHorizontal, FolderOpen } from "lucide-react";
 import Logo from "../components/Logo";
 import api from "../api";
 import { useLang } from "../i18n";
@@ -30,14 +31,14 @@ export default function Login() {
         <div className="auth-container">
             <div className="auth-left">
                 <div className="auth-left-content">
-                    <span className="auth-left-icon">⚡</span>
+                    <span className="auth-left-icon"><Zap size={46} /></span>
                     <h2>{t("loginLeftTitle")}</h2>
                     <p>{t("loginLeftSub")}</p>
                 </div>
                 <div className="auth-features">
-                    <div className="auth-feature"><span className="auth-feature-icon">🧠</span> {t("authFeat1")}</div>
-                    <div className="auth-feature"><span className="auth-feature-icon">⚙️</span> {t("authFeat2")}</div>
-                    <div className="auth-feature"><span className="auth-feature-icon">📊</span> {t("authFeat3")}</div>
+                    <div className="auth-feature"><span className="auth-feature-icon"><Brain size={17} /></span> {t("authFeat1")}</div>
+                    <div className="auth-feature"><span className="auth-feature-icon"><SlidersHorizontal size={17} /></span> {t("authFeat2")}</div>
+                    <div className="auth-feature"><span className="auth-feature-icon"><FolderOpen size={17} /></span> {t("authFeat3")}</div>
                 </div>
             </div>
             <div className="auth-right">

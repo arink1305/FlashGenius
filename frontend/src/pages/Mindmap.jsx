@@ -1,13 +1,17 @@
 import { useState, useEffect, useRef, useMemo, useLayoutEffect, useCallback } from "react";
 import { useParams, Link } from "react-router-dom";
-import Logo from "../components/Logo";
+import { motion, AnimatePresence } from "framer-motion";
+import { ZoomIn, ZoomOut, Maximize, X, Plus, Minus, Network } from "lucide-react";
+import Topbar from "../components/Topbar";
+import ShareButton from "../components/ShareButton";
+import { ViewerSkeleton } from "../components/Skeleton";
 import api from "../api";
 import { useLang } from "../i18n";
 
 const COLORS = ["#6366f1", "#f59e0b", "#06b6d4", "#10b981", "#ec4899", "#8b5cf6"];
-const COL = 275;
-const ROW = 56;
-const NODE_H = 40;
+const COL = 320;
+const ROW = 72;
+const NODE_H = 52;
 
 function normNode(node) {
     if (typeof node === "string") return { title: node, children: [] };
@@ -63,14 +67,43 @@ function layout(tree, expanded) {
     }
 
     walk(tree, "0", 0, null, "#1a1040");
-    const width = Math.max(...nodes.map((n) => n.x), 0) + 230;
+    const width = Math.max(...nodes.map((n) => n.x), 0) + 260;
     const height = Math.max(leaf * ROW, ROW) + 20;
     return { nodes, links, width, height };
 }
 
 function curve(x1, y1, x2, y2) {
-    const dx = Math.max(24, (x2 - x1) * 0.45);
+    const dx = Math.max(30, (x2 - x1) * 0.5);
     return `M ${x1} ${y1} C ${x1 + dx} ${y1}, ${x2 - dx} ${y2}, ${x2} ${y2}`;
+}
+
+function collectIds(node, id, out) {
+    if (node.children?.length) {
+        out.push(id);
+        node.children.forEach((child, i) => collectIds(child, `${id}-${i}`, out));
+    }
+    return out;
+}
+
+function pathTo(tree, id) {
+    const parts = id.split("-").map(Number);
+    const titles = [];
+    let node = tree;
+    titles.push(node.title);
+    for (let i = 1; i < parts.length; i++) {
+        node = node.children[parts[i]];
+        if (!node) break;
+        titles.push(node.title);
+    }
+    return titles;
+}
+
+function isRelated(hoverId, nodeId) {
+    return (
+        hoverId === nodeId ||
+        hoverId.startsWith(nodeId + "-") ||
+        nodeId.startsWith(hoverId + "-")
+    );
 }
 
 export default function Mindmap() {
@@ -79,11 +112,24 @@ export default function Mindmap() {
     const [deck, setDeck] = useState(null);
     const [expanded, setExpanded] = useState(new Set(["0"]));
     const [paths, setPaths] = useState([]);
+    const [scale, setScale] = useState(1);
+    const [modal, setModal] = useState(null);
+    const [hoverId, setHoverId] = useState(null);
     const wrapRef = useRef(null);
+    const zoomRef = useRef(null);
+    const dragRef = useRef(null);
 
     useEffect(() => {
         api.get(`/flashcards/decks/${deckId}`).then((res) => setDeck(res.data));
     }, [deckId]);
+
+    useEffect(() => {
+        function onKey(e) {
+            if (e.key === "Escape") setModal(null);
+        }
+        document.addEventListener("keydown", onKey);
+        return () => document.removeEventListener("keydown", onKey);
+    }, []);
 
     const tree = useMemo(() => (deck ? normalize(deck.content, deck.title) : null), [deck]);
     const { nodes, links, width, height } = useMemo(
@@ -92,24 +138,24 @@ export default function Mindmap() {
     );
 
     const drawConnectors = useCallback(() => {
-        const wrap = wrapRef.current;
-        if (!wrap) return;
-        const box = wrap.getBoundingClientRect();
+        const zoom = zoomRef.current;
+        if (!zoom) return;
+        const zbox = zoom.getBoundingClientRect();
         const next = [];
         for (const link of links) {
-            const a = wrap.querySelector(`[data-node="${link.from}"]`);
-            const b = wrap.querySelector(`[data-node="${link.to}"]`);
+            const a = zoom.querySelector(`[data-node="${link.from}"]`);
+            const b = zoom.querySelector(`[data-node="${link.to}"]`);
             if (!a || !b) continue;
             const ra = a.getBoundingClientRect();
             const rb = b.getBoundingClientRect();
-            const x1 = ra.right - box.left + wrap.scrollLeft;
-            const y1 = ra.top + ra.height / 2 - box.top + wrap.scrollTop;
-            const x2 = rb.left - box.left + wrap.scrollLeft;
-            const y2 = rb.top + rb.height / 2 - box.top + wrap.scrollTop;
-            next.push({ id: link.id, d: curve(x1, y1, x2, y2), color: link.color });
+            const x1 = (ra.right - zbox.left) / scale;
+            const y1 = (ra.top + ra.height / 2 - zbox.top) / scale;
+            const x2 = (rb.left - zbox.left) / scale;
+            const y2 = (rb.top + rb.height / 2 - zbox.top) / scale;
+            next.push({ id: link.id, from: link.from, to: link.to, d: curve(x1, y1, x2, y2), color: link.color });
         }
         setPaths(next);
-    }, [links]);
+    }, [links, scale]);
 
     useLayoutEffect(() => {
         if (!tree) return;
@@ -122,7 +168,7 @@ export default function Mindmap() {
         };
         raf = requestAnimationFrame(loop);
         return () => cancelAnimationFrame(raf);
-    }, [tree, expanded, drawConnectors]);
+    }, [tree, expanded, scale, drawConnectors]);
 
     function toggle(id) {
         setExpanded((prev) => {
@@ -136,59 +182,178 @@ export default function Mindmap() {
         });
     }
 
+    function expandAll() {
+        if (!tree) return;
+        setExpanded(new Set(collectIds(tree, "0", [])));
+    }
+
+    function collapseAll() {
+        setExpanded(new Set(["0"]));
+    }
+
+    function center() {
+        setScale(1);
+        const wrap = wrapRef.current;
+        if (wrap) wrap.scrollTo({ top: 0, left: 0, behavior: "smooth" });
+    }
+
+    function onMouseDown(e) {
+        if (e.target.closest(".mm2-node")) return;
+        const wrap = wrapRef.current;
+        dragRef.current = { x: e.clientX, y: e.clientY, sl: wrap.scrollLeft, st: wrap.scrollTop };
+        wrap.classList.add("dragging");
+    }
+
+    function onMouseMove(e) {
+        const d = dragRef.current;
+        if (!d) return;
+        const wrap = wrapRef.current;
+        wrap.scrollLeft = d.sl - (e.clientX - d.x);
+        wrap.scrollTop = d.st - (e.clientY - d.y);
+    }
+
+    function endDrag() {
+        dragRef.current = null;
+        wrapRef.current?.classList.remove("dragging");
+    }
+
     if (!deck) {
         return (
             <div className="page">
-                <div className="content"><div style={{ fontSize: "2rem", marginTop: "80px", textAlign: "center" }}>⏳</div></div>
+                <Topbar>
+                    <Link to="/" className="btn-ghost">{t("back")}</Link>
+                </Topbar>
+                <main className="content">
+                    <ViewerSkeleton />
+                </main>
             </div>
         );
     }
 
+    const modalPath = modal && tree ? pathTo(tree, modal.id) : [];
+
     return (
         <div className="page">
-            <header className="topbar">
-                <Link to="/" className="topbar-logo">
-                    <Logo className="topbar-logo-icon" />
-                    <span className="topbar-logo-name">FlashGenius</span>
-                </Link>
+            <Topbar>
+                <ShareButton deckId={deckId} />
                 <Link to="/" className="btn-ghost">{t("back")}</Link>
-            </header>
+            </Topbar>
 
             <main className="content">
                 <div className="study-hero">
                     <div className="study-hero-text">
-                        <h1>🧠 {deck.title}</h1>
+                        <h1><Network size={20} style={{ marginRight: 8, verticalAlign: "-3px" }} />{deck.title}</h1>
                         <p>{t("mindmapHeroSub")}</p>
+                    </div>
+                    <div className="mm2-controls">
+                        <button className="mm2-ctrl-btn" onClick={() => setScale((s) => Math.min(1.6, +(s + 0.15).toFixed(2)))} title={t("mmZoomIn")} aria-label={t("mmZoomIn")}>
+                            <ZoomIn size={16} />
+                        </button>
+                        <button className="mm2-ctrl-btn" onClick={() => setScale((s) => Math.max(0.5, +(s - 0.15).toFixed(2)))} title={t("mmZoomOut")} aria-label={t("mmZoomOut")}>
+                            <ZoomOut size={16} />
+                        </button>
+                        <button className="mm2-ctrl-btn" onClick={center} title={t("mmCenter")} aria-label={t("mmCenter")}>
+                            <Maximize size={16} />
+                        </button>
+                        <button className="mm2-ctrl-btn text" onClick={expandAll}>{t("mmExpandAll")}</button>
+                        <button className="mm2-ctrl-btn text" onClick={collapseAll}>{t("mmCollapse")}</button>
                     </div>
                 </div>
 
-                <div className="mm2-scroll" ref={wrapRef}>
-                    <div className="mm2-canvas" style={{ width, height }}>
-                        <svg className="mm2-svg" width={width} height={height}>
-                            {paths.map((p) => (
-                                <path key={p.id} className="mm2-link" d={p.d} stroke={p.color} strokeWidth="2.5" fill="none" strokeLinecap="round" />
-                            ))}
-                        </svg>
+                <div
+                    className="mm2-scroll"
+                    ref={wrapRef}
+                    onMouseDown={onMouseDown}
+                    onMouseMove={onMouseMove}
+                    onMouseUp={endDrag}
+                    onMouseLeave={endDrag}
+                >
+                    <div className="mm2-canvas" style={{ width: width * scale, height: height * scale }}>
+                        <div className="mm2-zoom" ref={zoomRef} style={{ transform: `scale(${scale})`, width, height }}>
+                            <svg className="mm2-svg" width={width} height={height}>
+                                {paths.map((p) => {
+                                    const dimmed = hoverId && !(isRelated(hoverId, p.from) && isRelated(hoverId, p.to));
+                                    return (
+                                        <path
+                                            key={p.id}
+                                            className={`mm2-link ${dimmed ? "dim" : ""} ${hoverId && !dimmed ? "lit" : ""}`}
+                                            d={p.d}
+                                            style={{ "--branch-stroke": p.color }}
+                                            fill="none"
+                                            strokeLinecap="round"
+                                        />
+                                    );
+                                })}
+                            </svg>
 
-                        {nodes.map((n) => (
-                            <div
-                                key={n.id}
-                                data-node={n.id}
-                                className={`mm2-node ${n.depth === 0 ? "root" : ""} ${n.has ? "has-children" : ""} ${n.open ? "open" : ""}`}
-                                style={{
-                                    transform: `translate(${n.x}px, ${n.y - NODE_H / 2}px)`,
-                                    "--branch": n.color,
-                                }}
-                                onClick={() => n.has && toggle(n.id)}
-                                title={n.title}
-                            >
-                                <span className="mm2-label">{n.title}</span>
-                                {n.has && <span className="mm2-toggle">{n.open ? "−" : "+"}</span>}
-                            </div>
-                        ))}
+                            {nodes.map((n) => {
+                                const dimmed = hoverId && !isRelated(hoverId, n.id);
+                                return (
+                                    <div
+                                        key={n.id}
+                                        data-node={n.id}
+                                        className={`mm2-node ${n.depth === 0 ? "root" : ""} ${n.has ? "has-children" : ""} ${n.open ? "open" : ""} ${dimmed ? "dim" : ""}`}
+                                        style={{
+                                            transform: `translate(${n.x}px, ${n.y - NODE_H / 2}px)`,
+                                            "--branch": n.color,
+                                        }}
+                                        onClick={() => setModal({ id: n.id, title: n.title, color: n.color })}
+                                        onMouseEnter={() => setHoverId(n.id)}
+                                        onMouseLeave={() => setHoverId(null)}
+                                        role="button"
+                                        tabIndex={0}
+                                        onKeyDown={(e) => { if (e.key === "Enter") setModal({ id: n.id, title: n.title, color: n.color }); }}
+                                    >
+                                        <span className="mm2-label">{n.title}</span>
+                                        {n.has && (
+                                            <button
+                                                className="mm2-toggle"
+                                                onClick={(e) => { e.stopPropagation(); toggle(n.id); }}
+                                                aria-label={n.open ? t("mmCollapse") : t("mmExpandAll")}
+                                            >
+                                                {n.open ? <Minus size={12} /> : <Plus size={12} />}
+                                            </button>
+                                        )}
+                                    </div>
+                                );
+                            })}
+                        </div>
                     </div>
                 </div>
             </main>
+
+            <AnimatePresence>
+                {modal && (
+                    <motion.div
+                        className="mm2-modal-backdrop"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.18 }}
+                        onClick={() => setModal(null)}
+                    >
+                        <motion.div
+                            className="mm2-modal"
+                            style={{ "--branch": modal.color }}
+                            initial={{ opacity: 0, scale: 0.92, y: 16 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.95, y: 10 }}
+                            transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            <button className="mm2-modal-close" onClick={() => setModal(null)} aria-label={t("mmClose")}>
+                                <X size={16} />
+                            </button>
+                            {modalPath.length > 1 && (
+                                <p className="mm2-modal-path">
+                                    {modalPath.slice(0, -1).join("  ›  ")}
+                                </p>
+                            )}
+                            <h2 className="mm2-modal-title">{modal.title}</h2>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </div>
     );
 }

@@ -3,6 +3,7 @@ from pydantic import BaseModel
 from jose import jwt, JWTError
 import bcrypt
 import os
+import secrets
 from dotenv import load_dotenv
 from database import get_connection
 
@@ -69,13 +70,34 @@ def me(authorization: str = Header(...)):
     user_id = get_user_id(authorization)
     conn = get_connection()
     cur = conn.cursor()
-    cur.execute("SELECT email, is_pro FROM users WHERE id = %s", (user_id,))
+    cur.execute("SELECT email, is_pro, tier, api_key FROM users WHERE id = %s", (user_id,))
     row = cur.fetchone()
     cur.close()
     conn.close()
     if not row:
         raise HTTPException(status_code=404, detail="User not found")
-    return {"email": row[0], "is_pro": bool(row[1])}
+    tier = row[2] or "free"
+    if tier == "free" and row[1]:
+        tier = "plus"
+    return {"email": row[0], "is_pro": tier != "free", "tier": tier, "api_key": row[3]}
+
+@router.post("/api-key")
+def create_api_key(authorization: str = Header(...)):
+    user_id = get_user_id(authorization)
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute("SELECT tier FROM users WHERE id = %s", (user_id,))
+    row = cur.fetchone()
+    if not row or (row[0] or "free") != "ultra":
+        cur.close()
+        conn.close()
+        raise HTTPException(status_code=403, detail="requires_ultra")
+    key = "fg_" + secrets.token_urlsafe(24)
+    cur.execute("UPDATE users SET api_key = %s WHERE id = %s", (key, user_id))
+    conn.commit()
+    cur.close()
+    conn.close()
+    return {"api_key": key}
 
 @router.put("/password")
 def change_password(data: PasswordChange, authorization: str = Header(...)):

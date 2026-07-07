@@ -9,7 +9,7 @@ describe("useLang", () => {
 
     it("returns Norwegian by default", () => {
         const { result } = renderHook(() => useLang());
-        expect(result.current.t("dashTitle")).toBe("Mine sett 🧠");
+        expect(result.current.t("dashTitle")).toBe("Mine sett");
     });
 
     it("interpolates variables", () => {
@@ -20,7 +20,7 @@ describe("useLang", () => {
     it("switches the whole app to English via setLang", () => {
         const { result } = renderHook(() => useLang());
         act(() => result.current.setLang("en"));
-        expect(result.current.t("dashTitle")).toBe("My sets 🧠");
+        expect(result.current.t("dashTitle")).toBe("My sets");
         expect(result.current.t("cardOf", { i: 2, n: 3 })).toBe("Card 2 of 3");
     });
 

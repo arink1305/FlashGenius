@@ -1,6 +1,11 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
-import Logo from "../components/Logo";
+import { motion } from "framer-motion";
+import { FileText } from "lucide-react";
+import Topbar from "../components/Topbar";
+import ShareButton from "../components/ShareButton";
+import Footer from "../components/Footer";
+import { ViewerSkeleton } from "../components/Skeleton";
 import api from "../api";
 import { useLang } from "../i18n";
 
@@ -16,7 +21,10 @@ export default function Summary() {
     if (!deck) {
         return (
             <div className="page">
-                <div className="content"><div style={{ fontSize: "2rem", marginTop: "80px", textAlign: "center" }}>⏳</div></div>
+                <Topbar>
+                    <Link to="/" className="btn-ghost">{t("back")}</Link>
+                </Topbar>
+                <main className="content"><ViewerSkeleton /></main>
             </div>
         );
     }
@@ -26,32 +34,29 @@ export default function Summary() {
 
     return (
         <div className="page">
-            <header className="topbar">
-                <Link to="/" className="topbar-logo">
-                    <Logo className="topbar-logo-icon" />
-                    <span className="topbar-logo-name">FlashGenius</span>
-                </Link>
+            <Topbar>
+                <ShareButton deckId={deckId} />
                 <Link to="/" className="btn-ghost">{t("back")}</Link>
-            </header>
+            </Topbar>
 
             <main className="content">
                 <div className="study-hero">
                     <div className="study-hero-text">
-                        <h1>📝 {deck.title}</h1>
+                        <h1><FileText size={20} style={{ marginRight: 8, verticalAlign: "-3px" }} />{deck.title}</h1>
                         <p>{t("summaryHeroSub")}</p>
                     </div>
                 </div>
 
                 <div className="summary-layout">
-                    <div className="summary-main">
+                    <motion.div className="summary-main" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}>
                         <h2 className="summary-section-title">{t("summarySection")}</h2>
                         {(content.summary || "").split("\n").filter(Boolean).map((para, i) => (
                             <p key={i} className="summary-paragraph">{para}</p>
                         ))}
-                    </div>
+                    </motion.div>
 
                     {keyPoints.length > 0 && (
-                        <div className="summary-points">
+                        <motion.div className="summary-points" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}>
                             <h2 className="summary-section-title">{t("keyPoints")}</h2>
                             <ul className="key-points">
                                 {keyPoints.map((point, i) => (
@@ -61,10 +66,11 @@ export default function Summary() {
                                     </li>
                                 ))}
                             </ul>
-                        </div>
+                        </motion.div>
                     )}
                 </div>
             </main>
+            <Footer />
         </div>
     );
 }

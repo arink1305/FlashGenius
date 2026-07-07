@@ -1,5 +1,14 @@
 import "@testing-library/jest-dom";
 
+if (typeof globalThis.IntersectionObserver === "undefined") {
+    globalThis.IntersectionObserver = class {
+        observe() {}
+        unobserve() {}
+        disconnect() {}
+        takeRecords() { return []; }
+    };
+}
+
 if (typeof globalThis.localStorage === "undefined") {
     const store = {};
     Object.defineProperty(globalThis, "localStorage", {
