@@ -15,16 +15,16 @@ const darkenColor = (hex, percent) => {
     return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
 };
 
-export default function Folder({ color = "#6366f1", size = 0.62, open = false }) {
+export default function Folder({ color = "#E8633A", size = 0.62, open = false }) {
     const maxPapers = 3;
     const [offsets, setOffsets] = useState(Array.from({ length: maxPapers }, () => ({ x: 0, y: 0 })));
 
     const folderStyle = {
         "--folder-color": color,
         "--folder-back-color": darkenColor(color, 0.18),
-        "--paper-1": darkenColor("#ffffff", 0.1),
-        "--paper-2": darkenColor("#ffffff", 0.05),
-        "--paper-3": "#ffffff",
+        "--paper-1": darkenColor("#FBF9F4", 0.08),
+        "--paper-2": darkenColor("#FBF9F4", 0.04),
+        "--paper-3": "#FBF9F4",
     };
 
     function onPaperMove(e, index) {

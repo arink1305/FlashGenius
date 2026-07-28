@@ -8,7 +8,7 @@ import { ViewerSkeleton } from "../components/Skeleton";
 import api from "../api";
 import { useLang } from "../i18n";
 
-const COLORS = ["#6366f1", "#f59e0b", "#06b6d4", "#10b981", "#ec4899", "#8b5cf6"];
+const COLORS = ["#B24824", "#8C6D1F", "#46647A", "#4A7A57", "#A33327", "#6E675C"];
 const COL = 320;
 const ROW = 72;
 const NODE_H = 52;
@@ -66,7 +66,7 @@ function layout(tree, expanded) {
         return y;
     }
 
-    walk(tree, "0", 0, null, "#1a1040");
+    walk(tree, "0", 0, null, "#1C1914");
     const width = Math.max(...nodes.map((n) => n.x), 0) + 260;
     const height = Math.max(leaf * ROW, ROW) + 20;
     return { nodes, links, width, height };

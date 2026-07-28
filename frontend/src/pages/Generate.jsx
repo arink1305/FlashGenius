@@ -40,9 +40,9 @@ export default function Generate() {
     const canUpload = hasTier(me, "plus");
 
     const difficulties = [
-        { value: "easy", label: t("diffEasyLabel"), desc: t("diffEasyDesc"), dot: "#10b981" },
-        { value: "medium", label: t("diffMediumLabel"), desc: t("diffMediumDesc"), dot: "#f59e0b" },
-        { value: "hard", label: t("diffHardLabel"), desc: t("diffHardDesc"), dot: "#ef4444" },
+        { value: "easy", label: t("diffEasyLabel"), desc: t("diffEasyDesc"), dot: "#3D7A46" },
+        { value: "medium", label: t("diffMediumLabel"), desc: t("diffMediumDesc"), dot: "#8C6D1F" },
+        { value: "hard", label: t("diffHardLabel"), desc: t("diffHardDesc"), dot: "#C03A2B" },
     ];
 
     const tooLong = notes.length > MAX_CHARS;

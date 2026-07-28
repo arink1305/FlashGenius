@@ -36,10 +36,17 @@ export default function Landing() {
                     transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
                 >
                     <div className="landing-badge"><Sparkles size={14} /> {t("heroBadge")}</div>
-                    <h1 className="landing-title">
-                        {t("heroTitle1")}<br />
-                        <span className="landing-title-grad">{t("heroTitle2")}</span>
-                    </h1>
+                    <div className="landing-title-mask">
+                        <motion.h1
+                            className="landing-title"
+                            initial={{ y: "50%", opacity: 0 }}
+                            animate={{ y: 0, opacity: 1 }}
+                            transition={{ duration: 0.6, delay: 0.1, ease: [0.65, 0, 0.35, 1] }}
+                        >
+                            {t("heroTitle1")}<br />
+                            <span className="landing-title-grad">{t("heroTitle2")}</span>
+                        </motion.h1>
+                    </div>
                     <p className="landing-sub">{t("heroSub")}</p>
                     <div className="landing-ctas">
                         <Link to="/register" className="btn-primary landing-cta-main">{t("ctaCreate")} <ArrowRight size={16} /></Link>

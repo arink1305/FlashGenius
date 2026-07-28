@@ -30,6 +30,8 @@ Paste any text and let AI build **flashcards, quizzes, summaries, or mind maps**
 
 ![FlashGenius landing page](screenshots/landing.png)
 
+<sub>Light and dark mode share one warm paper-and-ink palette.</sub>
+
 </div>
 
 <br/>
@@ -65,7 +67,8 @@ Plus everything around it:
 -  **Accounts & authentication** — JWT-based auth with bcrypt-hashed passwords, plus API-key auth for Ultra
 -  **Light & dark mode** — switch themes instantly, preference is remembered
 -  **Bilingual UI** — toggle between Norwegian and English
--  **Polished motion design** — page transitions, staggered cards, skeleton loaders, and drifting background blobs (framer-motion + CSS)
+-  **Editorial design system** — a warm paper-and-ink palette with a single accent colour, Clash Display / General Sans typography, and hairline borders instead of heavy shadows
+-  **Restrained motion** — mask reveals and staggered sections on the landing page, and quick 150–250 ms micro-interactions inside the app so it stays fast to work in (framer-motion + CSS, `prefers-reduced-motion` respected)
 -  **Account management** — change password, export data, or delete your account
 -  **Public landing page** — browse the app and pricing before signing up
 
@@ -76,32 +79,52 @@ Plus everything around it:
 <table>
   <tr>
     <td width="50%">
-      <strong>Choose what to generate</strong><br/>
-      <img src="screenshots/newset.png" alt="Generation mode chooser" />
+      <strong>Dashboard</strong><br/>
+      <img src="screenshots/dashboard.png" alt="Dashboard with sets, folders and streak" />
     </td>
     <td width="50%">
-      <strong>Dashboard</strong><br/>
-      <img src="screenshots/dashboard.png" alt="Dashboard" />
+      <strong>Dashboard — dark mode</strong><br/>
+      <img src="screenshots/dashboard-dark.png" alt="Dashboard in dark mode" />
     </td>
   </tr>
   <tr>
     <td width="50%">
-      <strong>Quiz mode</strong><br/>
-      <img src="screenshots/quiz.png" alt="Interactive quiz" />
+      <strong>Choose what to generate</strong><br/>
+      <img src="screenshots/newset.png" alt="Generation mode chooser" />
     </td>
     <td width="50%">
+      <strong>Generate from your notes</strong><br/>
+      <img src="screenshots/generate.png" alt="Notes input with count and difficulty settings" />
+    </td>
+  </tr>
+  <tr>
+    <td width="50%">
       <strong>Flashcard study mode</strong><br/>
-      <img src="screenshots/study-flipped.png" alt="Flashcard study mode" />
+      <img src="screenshots/study-flipped.png" alt="Flashcard flipped to the answer side" />
+    </td>
+    <td width="50%">
+      <strong>Quiz mode</strong><br/>
+      <img src="screenshots/quiz.png" alt="Interactive quiz with instant feedback" />
     </td>
   </tr>
   <tr>
     <td width="50%">
       <strong>AI summary</strong><br/>
-      <img src="screenshots/summary.png" alt="Summary view" />
+      <img src="screenshots/summary.png" alt="Summary with key points" />
     </td>
     <td width="50%">
       <strong>Mind map</strong><br/>
-      <img src="screenshots/mindmap.png" alt="Mind map view" />
+      <img src="screenshots/mindmap.png" alt="Interactive mind map with expandable branches" />
+    </td>
+  </tr>
+  <tr>
+    <td width="50%">
+      <strong>Statistics</strong><br/>
+      <img src="screenshots/stats.png" alt="Streaks, weekly chart and per-deck mastery" />
+    </td>
+    <td width="50%">
+      <strong>Pricing</strong><br/>
+      <img src="screenshots/pricing.png" alt="Plan comparison" />
     </td>
   </tr>
   <tr>
@@ -143,7 +166,7 @@ Plus everything around it:
 
 | Layer | Technology |
 |-------|------------|
-| **Frontend** | React 19, Vite, React Router, Axios, framer-motion, lucide-react, plain CSS (custom properties, glass morphism, animations) |
+| **Frontend** | React 19, Vite, React Router, Axios, framer-motion, lucide-react, plain CSS (custom properties, theming, animations) |
 | **Backend** | FastAPI, Uvicorn |
 | **Database** | PostgreSQL (via `psycopg2`) |
 | **Auth** | JWT (`python-jose`), password hashing with `bcrypt`, API keys for Ultra |
@@ -283,7 +306,7 @@ This is a full-stack project I built end to end:
 - Designed a **relational schema** in PostgreSQL (users → folders → decks → flashcards → card progress + review log) and wrote the queries by hand.
 - Implemented the **SM-2 spaced-repetition algorithm** on the backend to schedule card reviews, feeding the streak and mastery statistics.
 - Integrated a **large language model** (Llama 3.x through Groq) and engineered the prompt so the model returns strict, parseable JSON every time.
-- Did all the **UI/UX and styling** myself in plain CSS + framer-motion — the light/dark themes, gradients, glass morphism, page transitions, and micro-animations.
+- Did all the **UI/UX and styling** myself in plain CSS + framer-motion — an editorial paper-and-ink design system, a warm dark mode that keeps the same feel instead of turning black, page transitions, micro-animations, and WCAG AA contrast in both themes.
 
 ## 🎓 What I learned
 

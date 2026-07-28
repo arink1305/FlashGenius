@@ -237,7 +237,7 @@ export default function Dashboard() {
                         className={`folder-card ${activeFolder === null ? "active" : ""}`}
                         onClick={() => setActiveFolder(null)}
                     >
-                        <Folder open={activeFolder === null} color="#6366f1" />
+                        <Folder open={activeFolder === null} color="#E8633A" />
                         <span className="folder-name">{t("allSets")}</span>
                         <span className="folder-count">{t("setsInFolder", { n: decks?.length ?? 0 })}</span>
                     </button>
@@ -258,7 +258,7 @@ export default function Dashboard() {
                             ) : (
                                 <>
                                     <button className="folder-hit" onClick={() => setActiveFolder(activeFolder === folder.id ? null : folder.id)}>
-                                        <Folder open={activeFolder === folder.id} color={["#6366f1", "#f59e0b", "#06b6d4", "#10b981", "#ec4899", "#8b5cf6"][i % 6]} />
+                                        <Folder open={activeFolder === folder.id} color={["#C2703A", "#8C6D1F", "#46647A", "#4A7A57", "#A33327", "#6E675C"][i % 6]} />
                                         <span className="folder-name">{folder.name}</span>
                                         <span className="folder-count">{t("setsInFolder", { n: folderCounts[folder.id] || 0 })}</span>
                                     </button>

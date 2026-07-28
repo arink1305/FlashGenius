@@ -1,5 +1,5 @@
 import { Routes, Route, Navigate, useLocation } from "react-router-dom";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, MotionConfig, motion } from "framer-motion";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
@@ -28,12 +28,7 @@ function HomeRoute() {
 export default function App() {
     const location = useLocation();
     return (
-        <>
-            <div className="bg-blobs" aria-hidden="true">
-                <span className="blob blob-1" />
-                <span className="blob blob-2" />
-                <span className="blob blob-3" />
-            </div>
+        <MotionConfig reducedMotion="user">
             <AnimatePresence mode="wait" initial={false}>
                 <motion.div
                     key={location.pathname}
@@ -61,6 +56,6 @@ export default function App() {
                     </Routes>
                 </motion.div>
             </AnimatePresence>
-        </>
+        </MotionConfig>
     );
 }
