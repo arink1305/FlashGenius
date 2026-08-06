@@ -8,11 +8,11 @@ Paste any text and let AI build **flashcards, quizzes, summaries, or mind maps**
 
 <br/>
 
-### 🔗 [**Try the live demo →**](https://flash-genius-vvo5.vercel.app)
+###  [**Try the live demo →**](https://flash-genius-vvo5.vercel.app)
 
 <sub>Hosted on Vercel (frontend + serverless backend) with a Neon PostgreSQL database. The backend may take a few seconds to wake up on the first request.</sub>
 
-<sub>💳 **Try the paid plans for free:** payments run in Stripe test mode — use card number `4242 4242 4242 4242`, any future expiry date, and any CVC to unlock Plus/Pro/Ultra without spending a krone.</sub>
+<sub> **Try the paid plans for free:** payments run in Stripe test mode — use card number `4242 4242 4242 4242`, any future expiry date, and any CVC to unlock Plus/Pro/Ultra without spending a krone.</sub>
 
 <br/>
 
@@ -36,14 +36,14 @@ Paste any text and let AI build **flashcards, quizzes, summaries, or mind maps**
 
 <br/>
 
-## ✨ Features
+##  Features
 
 **Four AI generation modes** — pick what to create from your notes:
 
-- 🃏 **Flashcards** — Q&A cards with configurable count (5–20) and difficulty (easy / medium / hard), studied with a card-flip interface
-- ❓ **Quizzes** — multiple-choice (4 options) or yes/no questions, answered interactively with instant feedback and a score
-- 📝 **Summaries** — a structured summary plus a list of key points
-- 🧠 **Mind maps** — an interactive, zoomable tree with collapsible branches, branch highlighting, and click-to-expand nodes
+-  **Flashcards** — Q&A cards with configurable count (5–20) and difficulty (easy / medium / hard), studied with a card-flip interface
+-  **Quizzes** — multiple-choice (4 options) or yes/no questions, answered interactively with instant feedback and a score
+-  **Summaries** — a structured summary plus a list of key points
+-  **Mind maps** — an interactive, zoomable tree with collapsible branches, branch highlighting, and click-to-expand nodes
 
 **Monetization** — a real freemium model backed by Stripe Checkout:
 
@@ -251,7 +251,7 @@ The app runs on **http://localhost:5173**.
 
 <br/>
 
-## 🧪 Tests, CI & Docker
+## Tests, CI & Docker
 
 **Tests** — backend logic (auth hashing, JWT, AI-response parsing & mind-map normalization) and frontend utilities/hooks are covered by unit tests:
 
@@ -304,7 +304,7 @@ FlashGenius/
 
 <br/>
 
-## 💡 What I built
+##  What I built
 
 This is a full-stack project I built end to end:
 
@@ -316,7 +316,7 @@ This is a full-stack project I built end to end:
 - Integrated a **large language model** (Llama 3.x through Groq) and engineered the prompt so the model returns strict, parseable JSON every time.
 - Did all the **UI/UX and styling** myself in plain CSS + framer-motion — an editorial paper-and-ink design system, a warm dark mode that keeps the same feel instead of turning black, page transitions, micro-animations, and WCAG AA contrast in both themes.
 
-## 🎓 What I learned
+##  What I learned
 
 - **Connecting a frontend, backend, database, and an external AI API** into one working product — and how the pieces talk to each other over HTTP and SQL.
 - **Authentication done properly** — how JWTs flow from login through to protected endpoints, and why passwords must be hashed (I hit and fixed a real bcrypt edge case along the way).
