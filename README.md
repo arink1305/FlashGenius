@@ -219,6 +219,14 @@ Create a `backend/.env` file:
 GROQ_API_KEY=your_groq_api_key_here
 DATABASE_URL=postgresql://localhost/flashgenius
 SECRET_KEY=a_long_random_secret_string
+STRIPE_SECRET_KEY=sk_test_your_stripe_test_key
+```
+
+Create the tables (run this again after any schema change — the API does not
+migrate on startup, since that would run on every serverless cold start):
+
+```bash
+python migrate.py
 ```
 
 Start the API:
