@@ -4,16 +4,28 @@ The API does not run init_db() on startup — doing that on every serverless
 cold start hangs the first request. So the schema has to be applied manually
 whenever it changes:
 
+    python migrate.py
+
+It asks for the connection string and hides what you type, so the password
+never ends up in your shell history. To skip the prompt (CI, scripts):
+
     DATABASE_URL="postgresql://..." python migrate.py
 
 Safe to run as many times as you like: every statement in init_db() is
 CREATE TABLE IF NOT EXISTS or ADD COLUMN IF NOT EXISTS, and nothing is
 dropped. Existing rows are kept.
 """
+import getpass
 import os
+import re
 import sys
 
-from database import get_connection, init_db
+# Read this before importing database, which calls load_dotenv() and would
+# otherwise quietly hand us the local .env database instead of the one meant
+# to be migrated.
+SHELL_URL = os.environ.get("DATABASE_URL")
+
+from database import get_connection, init_db  # noqa: E402
 
 EXPECTED = {
     "users": ["id", "email", "password", "is_pro", "tier", "api_key", "created_at"],
@@ -53,12 +65,35 @@ def diff(before, after):
     return lines
 
 
+def describe(url):
+    """Host and database name only — never the credentials."""
+    m = re.match(r"\w+://(?:[^@]*@)?([^/?]+)/([^?]+)", url or "")
+    return f"{m.group(1)} / {m.group(2)}" if m else "(unrecognised connection string)"
+
+
+def resolve_url():
+    if SHELL_URL:
+        return SHELL_URL
+    print("Paste the connection string for the database to migrate.")
+    print("Neon: Dashboard -> Connection string. Input stays hidden.\n")
+    url = getpass.getpass("DATABASE_URL: ").strip()
+    if not url:
+        sys.exit("Nothing entered — aborted.")
+    return url
+
+
 def main():
-    if not os.getenv("DATABASE_URL"):
-        sys.exit("DATABASE_URL is not set — point it at the database you want to migrate.")
+    url = resolve_url()
+    os.environ["DATABASE_URL"] = url
+
+    target = describe(url)
+    print(f"\nTarget: {target}")
+    if "--yes" not in sys.argv:
+        if input("Migrate this database? [y/N] ").strip().lower() not in ("y", "yes"):
+            sys.exit("Aborted.")
 
     before = snapshot()
-    print(f"Found {len(before)} tables before migrating.")
+    print(f"\nFound {len(before)} tables before migrating.")
 
     init_db()
 
