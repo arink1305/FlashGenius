@@ -60,7 +60,7 @@ Plus everything around it:
 
 -  **Powered by Llama 3.x** via the Groq API, with robust JSON parsing (retry + salvage) so generations don't fail — Pro/Ultra requests use the larger 70B model
 -  **Smart review** — an SM-2 spaced-repetition engine schedules each card exactly when you're about to forget it
--  **Statistics** — day streaks, a weekly review chart, and per-deck mastery tracking
+-  **Statistics** — day streaks, a weekly review chart, and per-deck mastery. Mastery is graded on how far each card's SM-2 interval has stretched rather than on a pass/fail threshold, so progress moves from the first review onwards, and every deck shows its card mix (mature / young / learning / new, using Anki's 21-day maturity line) plus when it is next due
 -  **Folders** — organize your sets into color-coded animated folders
 -  **File upload** — extract notes straight from PDF, TXT, or MD files in the browser
 -  **Set sharing** — Ultra users can publish read-only links to any set
@@ -120,7 +120,7 @@ Plus everything around it:
   <tr>
     <td width="50%">
       <strong>Statistics</strong><br/>
-      <img src="screenshots/stats.png" alt="Streaks, weekly chart and per-deck mastery" />
+      <img src="screenshots/stats.png" alt="Streaks, weekly chart and per-deck mastery with the card mix per deck" />
     </td>
     <td width="50%">
       <strong>Pricing</strong><br/>

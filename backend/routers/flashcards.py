@@ -14,6 +14,9 @@ from database import get_connection
 load_dotenv()
 
 router = APIRouter()
+
+# An interval of 21 days or more counts as mature, the same line Anki draws.
+MATURE_DAYS = 21
 SECRET_KEY = os.getenv("SECRET_KEY", "fallback_secret")
 
 TIER_ORDER = {"free": 0, "plus": 1, "pro": 2, "ultra": 3}
@@ -531,10 +534,17 @@ def get_due_cards(deck_id: int, authorization: str = Header(...)):
     rows = cur.fetchall()
     cur.execute("SELECT count(*) FROM flashcards WHERE deck_id = %s", (deck_id,))
     total = cur.fetchone()[0]
+    cur.execute("""
+        SELECT min(p.due) FROM card_progress p
+        JOIN flashcards f ON f.id = p.card_id
+        WHERE f.deck_id = %s AND p.user_id = %s AND p.due > NOW()
+    """, (deck_id, user_id))
+    nxt = cur.fetchone()[0]
     cur.close()
     conn.close()
     return {
         "total": total,
+        "next_due": nxt.isoformat() if nxt else None,
         "due": [{"id": r[0], "question": r[1], "answer": r[2], "reps": r[4] or 0} for r in rows],
     }
 
@@ -625,19 +635,42 @@ def get_stats(authorization: str = Header(...)):
             else:
                 break
 
+    # Cards are graded on how far the SM-2 interval has stretched rather than on a
+    # single pass/fail threshold, so progress moves from the very first review.
+    # Buckets follow Anki: mature at an interval of 21 days or more, young below
+    # that, learning while the interval is still under a day.
     cur.execute("""
         SELECT d.id, d.title,
                count(f.id) AS total,
-               count(p.id) FILTER (WHERE p.reps >= 2) AS learned
+               count(p.id) FILTER (WHERE p.interval_days >= %s)              AS mature,
+               count(p.id) FILTER (WHERE p.interval_days >= 1
+                                    AND p.interval_days < %s)                AS young,
+               count(p.id) FILTER (WHERE p.id IS NOT NULL
+                                    AND p.interval_days < 1)                 AS learning,
+               count(f.id) - count(p.id)                                     AS fresh,
+               min(p.due) FILTER (WHERE p.due > NOW())                       AS next_due,
+               avg(
+                   CASE
+                       WHEN p.id IS NULL           THEN 0
+                       WHEN p.interval_days < 1    THEN 0.1
+                       ELSE least(1.0, ln(1 + p.interval_days) / ln(1 + %s))
+                   END
+               ) AS strength
         FROM decks d
         JOIN flashcards f ON f.deck_id = d.id
         LEFT JOIN card_progress p ON p.card_id = f.id AND p.user_id = %s
         WHERE d.user_id = %s AND d.type = 'flashcards'
         GROUP BY d.id, d.title
         ORDER BY d.created_at DESC
-    """, (user_id, user_id))
+    """, (MATURE_DAYS, MATURE_DAYS, MATURE_DAYS, user_id, user_id))
     mastery = [
-        {"deck_id": r[0], "title": r[1], "total": r[2], "learned": r[3], "pct": round(r[3] / r[2] * 100) if r[2] else 0}
+        {
+            "deck_id": r[0], "title": r[1], "total": r[2],
+            "mature": r[3], "young": r[4], "learning": r[5], "new": r[6],
+            "next_due": r[7].isoformat() if r[7] else None,
+            "pct": round(float(r[8]) * 100) if r[8] is not None else 0,
+            "learned": r[3],
+        }
         for r in cur.fetchall()
     ]
 

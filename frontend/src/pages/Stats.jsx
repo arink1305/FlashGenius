@@ -7,6 +7,7 @@ import Footer from "../components/Footer";
 import { ViewerSkeleton } from "../components/Skeleton";
 import api from "../api";
 import { useLang } from "../i18n";
+import { dueIn } from "../dueTime";
 
 export default function Stats() {
     const { t, lang } = useLang();
@@ -108,15 +109,34 @@ export default function Stats() {
                                                     <Link to={`/smart/${deck.deck_id}`} className="mastery-title">{deck.title}</Link>
                                                     <span className="mastery-pct">{deck.pct}%</span>
                                                 </div>
-                                                <div className="mastery-track">
-                                                    <motion.div
-                                                        className="mastery-fill"
-                                                        initial={{ width: 0 }}
-                                                        animate={{ width: `${deck.pct}%` }}
-                                                        transition={{ delay: 0.2 + i * 0.07, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-                                                    />
+                                                <div className="mastery-track" title={t("statsMatureHint")}>
+                                                    {["mature", "young", "learning"].map((band, b) => {
+                                                        const n = deck[band] || 0;
+                                                        if (!n) return null;
+                                                        return (
+                                                            <motion.div
+                                                                key={band}
+                                                                className={`mastery-seg seg-${band}`}
+                                                                initial={{ width: 0 }}
+                                                                animate={{ width: `${(n / deck.total) * 100}%` }}
+                                                                transition={{ delay: 0.2 + i * 0.07 + b * 0.06, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+                                                            />
+                                                        );
+                                                    })}
                                                 </div>
-                                                <span className="mastery-sub">{t("statsLearned", { learned: deck.learned, total: deck.total })}</span>
+                                                <span className="mastery-sub">
+                                                    {t("statsBreakdown", {
+                                                        mature: deck.mature ?? 0,
+                                                        young: deck.young ?? 0,
+                                                        learning: deck.learning ?? 0,
+                                                        new: deck.new ?? deck.total,
+                                                    })}
+                                                    {deck.next_due ? (
+                                                        <em className="mastery-due">
+                                                            {t("statsNextDue", { when: dueIn(deck.next_due, t) })}
+                                                        </em>
+                                                    ) : null}
+                                                </span>
                                             </div>
                                         ))}
                                     </div>

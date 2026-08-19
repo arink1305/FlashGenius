@@ -6,6 +6,7 @@ import Topbar from "../components/Topbar";
 import { ViewerSkeleton } from "../components/Skeleton";
 import api from "../api";
 import { useLang } from "../i18n";
+import { dueIn } from "../dueTime";
 
 const GRADES = [
     { quality: 1, key: "smartAgain", cls: "grade-again" },
@@ -18,6 +19,7 @@ export default function SmartStudy() {
     const { deckId } = useParams();
     const { t } = useLang();
     const [queue, setQueue] = useState(null);
+    const [nextDue, setNextDue] = useState(null);
     const [locked, setLocked] = useState(false);
     const [flipped, setFlipped] = useState(false);
     const [reviewed, setReviewed] = useState(0);
@@ -25,7 +27,7 @@ export default function SmartStudy() {
 
     useEffect(() => {
         api.get(`/flashcards/decks/${deckId}/due`)
-            .then((res) => setQueue(res.data.due))
+            .then((res) => { setQueue(res.data.due); setNextDue(res.data.next_due || null); })
             .catch((err) => {
                 if (err.response?.status === 403) setLocked(true);
             })
@@ -91,7 +93,10 @@ export default function SmartStudy() {
                         </div>
                         <div className="complete-badge">{t("smartTitle")}</div>
                         <h2>{reviewed > 0 ? t("smartDone") : t("smartNothingDue")}</h2>
-                        <p>{reviewed > 0 ? t("smartDoneText", { n: reviewed }) : t("smartNothingDueText")}</p>
+                        <p>
+                            {reviewed > 0 ? t("smartDoneText", { n: reviewed }) : t("smartNothingDueText")}
+                            {nextDue ? ` ${t("smartNextDue", { when: dueIn(nextDue, t) })}` : ""}
+                        </p>
                         <div className="study-nav" style={{ marginTop: "8px" }}>
                             <Link to="/" className="btn-primary">{t("backToOverview")}</Link>
                         </div>
