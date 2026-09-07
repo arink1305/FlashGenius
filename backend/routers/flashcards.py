@@ -21,8 +21,11 @@ SECRET_KEY = os.getenv("SECRET_KEY", "fallback_secret")
 
 TIER_ORDER = {"free": 0, "plus": 1, "pro": 2, "ultra": 3}
 FREE_DECK_LIMIT = 5
-FAST_MODEL = "llama-3.1-8b-instant"
-SMART_MODEL = "llama-3.3-70b-versatile"
+# Groq retires models without warning — the Llama pair these replaced disappeared
+# and every generation started failing with model_not_found. If that happens
+# again, check https://api.groq.com/openai/v1/models for what is served now.
+FAST_MODEL = "openai/gpt-oss-20b"
+SMART_MODEL = "openai/gpt-oss-120b"
 
 def get_groq():
     return Groq(api_key=os.getenv("GROQ_API_KEY"))

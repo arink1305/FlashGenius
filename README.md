@@ -23,7 +23,7 @@ Paste any text and let AI build **flashcards, quizzes, summaries, or mind maps**
 ![Vite](https://img.shields.io/badge/Vite-8-646CFF?style=for-the-badge&logo=vite&logoColor=white)
 ![FastAPI](https://img.shields.io/badge/FastAPI-0.138-009688?style=for-the-badge&logo=fastapi&logoColor=white)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-336791?style=for-the-badge&logo=postgresql&logoColor=white)
-![Groq](https://img.shields.io/badge/Groq_AI-Llama_3.x-F55036?style=for-the-badge&logo=meta&logoColor=white)
+![Groq](https://img.shields.io/badge/Groq_AI-gpt--oss-F55036?style=for-the-badge&logo=openai&logoColor=white)
 ![Stripe](https://img.shields.io/badge/Stripe-Payments-635BFF?style=for-the-badge&logo=stripe&logoColor=white)
 
 <br/>
@@ -58,7 +58,7 @@ One-time payments with upgrade credit — existing customers only pay the differ
 
 Plus everything around it:
 
--  **Powered by Llama 3.x** via the Groq API, with robust JSON parsing (retry + salvage) so generations don't fail — Pro/Ultra requests use the larger 70B model
+-  **Powered by open models on the Groq API**, with robust JSON parsing (retry + salvage) so generations don't fail — Pro/Ultra requests use the larger 120B model
 -  **Smart review** — an SM-2 spaced-repetition engine schedules each card exactly when you're about to forget it
 -  **Statistics** — day streaks, a weekly review chart, and per-deck mastery. Mastery is graded on how far each card's SM-2 interval has stretched rather than on a pass/fail threshold, so progress moves from the first review onwards, and every deck shows its card mix (mature / young / learning / new, using Anki's 21-day maturity line) plus when it is next due
 -  **Folders** — organize your sets into color-coded animated folders
@@ -146,7 +146,7 @@ Plus everything around it:
 ```
 ┌─────────────┐      ┌──────────────┐      ┌─────────────┐      ┌──────────────┐
 │   React +   │ HTTP │   FastAPI    │  SQL │ PostgreSQL  │      │   Groq API   │
-│    Vite     │─────▶│   backend    │─────▶│  database   │      │  (Llama 3.1) │
+│    Vite     │─────▶│   backend    │─────▶│  database   │      │   (gpt-oss)  │
 │  (frontend) │◀─────│              │◀─────│             │      │              │
 └─────────────┘ JSON └──────┬───────┘ rows └─────────────┘      └──────▲───────┘
                             │                                          │
@@ -156,7 +156,7 @@ Plus everything around it:
 
 1. **You paste notes** on the Generate page and choose a card count and difficulty.
 2. The **frontend** sends the request to the FastAPI backend with your JWT token in the `Authorization` header.
-3. The **backend** builds a prompt and asks **Groq (Llama 3.1)** to return a strict JSON array of `{ question, answer }` objects.
+3. The **backend** builds a prompt and asks **Groq** to return a strict JSON array of `{ question, answer }` objects.
 4. The cards are **saved to PostgreSQL** under a new deck linked to your user, and the deck is returned to the frontend.
 5. You're taken straight into **study mode** to review them.
 
@@ -171,7 +171,7 @@ Plus everything around it:
 | **Database** | PostgreSQL (via `psycopg2`) |
 | **Auth** | JWT (`python-jose`), password hashing with `bcrypt`, API keys for Ultra |
 | **Payments** | Stripe Checkout (one-time payments, tier metadata, server-side verification) |
-| **AI** | Groq API — `llama-3.1-8b-instant` (Free/Plus) and `llama-3.3-70b-versatile` (Pro/Ultra) |
+| **AI** | Groq API — `openai/gpt-oss-20b` (Free/Plus) and `openai/gpt-oss-120b` (Pro/Ultra) |
 
 <br/>
 
@@ -313,7 +313,7 @@ This is a full-stack project I built end to end:
 - Integrated **Stripe Checkout** end to end — one-time payments per tier, upgrade pricing where existing customers pay only the difference, and server-side payment verification before any account is upgraded.
 - Designed a **relational schema** in PostgreSQL (users → folders → decks → flashcards → card progress + review log) and wrote the queries by hand.
 - Implemented the **SM-2 spaced-repetition algorithm** on the backend to schedule card reviews, feeding the streak and mastery statistics.
-- Integrated a **large language model** (Llama 3.x through Groq) and engineered the prompt so the model returns strict, parseable JSON every time.
+- Integrated a **large language model** through Groq and engineered the prompt so the model returns strict, parseable JSON every time — including swapping the model out when the provider retired the one I had been using.
 - Did all the **UI/UX and styling** myself in plain CSS + framer-motion — an editorial paper-and-ink design system, a warm dark mode that keeps the same feel instead of turning black, page transitions, micro-animations, and WCAG AA contrast in both themes.
 
 ##  What I learned
