@@ -1488,13 +1488,29 @@ input:focus, textarea:focus {
 
     .footer-link { padding: 8px 0; }
 
-    .topbar { padding: 12px 16px; }
+    .topbar { padding: 10px 12px; gap: 10px; }
     .content { padding: 24px 18px 48px; }
 
-    .topbar-logo-name { font-size: 1rem; }
-    .topbar-actions { gap: 7px; }
-    .topbar-actions .btn-primary { padding: 9px 13px; font-size: 0.82rem; }
-    .topbar-icon-btn, .profile-btn { width: 38px; height: 38px; }
+    /* the brand gives way instead of colliding with the actions */
+    .topbar-logo { min-width: 0; gap: 8px; }
+    .topbar-logo-icon { width: 34px; height: 34px; flex-shrink: 0; }
+    .topbar-logo-name {
+        font-size: 0.95rem;
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .topbar-actions { gap: 6px; flex-shrink: 0; }
+    /* narrower and lighter, but still 44px tall to stay tappable */
+    .topbar-actions .btn-primary { padding: 0 13px; font-size: 0.78rem; gap: 5px; }
+    .topbar-icon-btn, .profile-btn { width: 40px; height: 40px; }
+
+    /* below this the label costs more than it explains — the + carries it,
+       and the brand name gets the room back */
+    .topbar-actions .btn-primary .btn-text-label { display: none; }
+    .topbar-actions .btn-primary { width: 44px; padding: 0; gap: 0; }
 
     .page-header h1 { font-size: 1.65rem; }
     .page-header p { font-size: 0.92rem; }
@@ -1532,8 +1548,9 @@ input:focus, textarea:focus {
 }
 
 @media (max-width: 380px) {
-    .topbar-logo-name { display: none; }
-    .topbar-actions .btn-primary { padding: 9px 12px; }
+    .topbar-logo-name { font-size: 0.9rem; }
+    .topbar-actions .btn-primary { padding: 0 11px; font-size: 0.75rem; }
+    .topbar-icon-btn, .profile-btn { width: 38px; height: 38px; }
 }
 
 .type-grid {

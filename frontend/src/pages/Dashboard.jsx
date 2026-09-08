@@ -134,8 +134,8 @@ export default function Dashboard() {
     return (
         <div className="page">
             <Topbar>
-                <Link to="/new" className="btn-primary">
-                    <Plus size={16} /> {t("newSet")}
+                <Link to="/new" className="btn-primary" title={t("newSet")} aria-label={t("newSet")}>
+                    <Plus size={16} /> <span className="btn-text-label">{t("newSet")}</span>
                 </Link>
                 {isPro && (
                     <Link to="/stats" className="topbar-icon-btn" title={t("viewStats")} aria-label={t("viewStats")}>
